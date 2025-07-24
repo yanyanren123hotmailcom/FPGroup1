@@ -9,9 +9,9 @@ export const initDB = async (req, res) => {
     }
 }
 
-export const seedCars = async (req, res) => {
+export const seedData = async (req, res) => {
     try {
-        const result = await dbService.seedCars();
+        const result = await dbService.seedData();
         res.json(result);
     } catch (error) {
         res.status(500).json({ error: error.message });

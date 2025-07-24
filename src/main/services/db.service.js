@@ -3,21 +3,57 @@ import connection from '../config/db.js';
 const initializeDB = async () => {
     try {
         // First check if the database exists
-        await connection.query('CREATE DATABASE IF NOT EXISTS car');
+        await connection.query('CREATE DATABASE IF NOT EXISTS finance');
 
         // Use the database
-        await connection.query('USE car');
+        await connection.query('USE finance');
 
-        // Create the cars table
+        // Create the users table
         const createTableQuery = `
-            CREATE TABLE IF NOT EXISTS cars (
+            CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                car_name VARCHAR(255) NOT NULL,
-                color VARCHAR(255) NOT NULL
+                user_name VARCHAR(255) NOT NULL,
+                original_funds decimal NOT NULL,
+                current_funds decimal NOT NULL
             )
         `;
-
         await connection.query(createTableQuery);
+
+        // Create the Invest table
+        const createInvestTableQuery = `
+            CREATE TABLE IF NOT EXISTS invest_projects (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                project_name VARCHAR(255) NOT NULL,
+                type INT NOT NULL,
+                price decimal NOT NULL comment 'price of the project',
+                rate decimal NOT NULL comment 'rate of the project'
+            )
+        `;
+        await connection.query(createInvestTableQuery);
+
+        // Create the InvestHold table
+        const createInvestHoldTableQuery = `
+            CREATE TABLE IF NOT EXISTS invest_holds (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                project_id INT NOT NULL,
+                amount INT NOT NULL,
+                hold_price decimal NOT NULL comment 'price of the project when user hold it',
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (project_id) REFERENCES invest_projects(id)
+            )
+        `;
+        await connection.query(createInvestHoldTableQuery);
+
+        //create invest_type_enum table
+        const createInvestTypeEnumQuery = `
+            CREATE TABLE IF NOT EXISTS invest_type_enum (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                type_name VARCHAR(255) NOT NULL
+            )
+        `;
+        await connection.query(createInvestTypeEnumQuery);
+
         return { message: 'Database initialized and table created successfully' };
     } catch (error) {
         console.error('Error initializing database:', error);
@@ -25,36 +61,36 @@ const initializeDB = async () => {
     }
 };
 
-const seedCars = async () => {
+const seedData = async () => {
     try {
         // First ensure the table exists
         await initializeDB();
 
         // Check if the table exists
-        const [tables] = await connection.query('SHOW TABLES LIKE "cars"');
+        const [tables] = await connection.query('SHOW TABLES LIKE "users"');
 
         if (tables.length === 0) {
-            throw new Error('Cars table does not exist');
+            throw new Error('users table does not exist');
         }
 
         // Delete existing data instead of TRUNCATE
-        await connection.query('DELETE FROM cars');
+        await connection.query('DELETE FROM users');
 
-        // Sample cars data
-        const cars = [
-            { car_name: 'Toyota Camry', color: 'Blue' },
-            { car_name: 'Honda Civic', color: 'Red' },
-            { car_name: 'Tesla Model 3', color: 'White' },
-            { car_name: 'Ford Mustang', color: 'Black' }
-        ];
+        // // Sample cars data
+        // const cars = [
+        //     { car_name: 'Toyota Camry', color: 'Blue' },
+        //     { car_name: 'Honda Civic', color: 'Red' },
+        //     { car_name: 'Tesla Model 3', color: 'White' },
+        //     { car_name: 'Ford Mustang', color: 'Black' }
+        // ];
 
-        // Insert each car
-        for (const car of cars) {
-            await connection.query(
-                'INSERT INTO cars (car_name, color) VALUES (?, ?)',
-                [car.car_name, car.color]
-            );
-        }
+        // // Insert each car
+        // for (const car of cars) {
+        //     await connection.query(
+        //         'INSERT INTO cars (car_name, color) VALUES (?, ?)',
+        //         [car.car_name, car.color]
+        //     );
+        // }
 
         return { message: 'Sample cars added successfully', count: cars.length };
     } catch (error) {
@@ -63,5 +99,5 @@ const seedCars = async () => {
     }
 };
 
-export { initializeDB, seedCars };
+export { initializeDB, seedData };
 
