@@ -13,8 +13,8 @@ const initializeDB = async () => {
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_name VARCHAR(255) NOT NULL,
-                original_funds decimal NOT NULL,
-                current_funds decimal NOT NULL
+                current_funds decimal NOT NULL,
+                current_earnings decimal NOT NULL
             )
         `;
         await connection.query(createTableQuery);
@@ -26,7 +26,9 @@ const initializeDB = async () => {
                 project_name VARCHAR(255) NOT NULL,
                 type INT NOT NULL,
                 price decimal NOT NULL comment 'price of the project',
-                rate decimal NOT NULL comment 'rate of the project'
+                rate decimal NOT NULL comment 'rate of the project',
+                description TEXT NOT NULL,
+                start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `;
         await connection.query(createInvestTableQuery);
@@ -36,6 +38,9 @@ const initializeDB = async () => {
             CREATE TABLE IF NOT EXISTS invest_holds (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
+                user_name VARCHAR(255) NOT NULL,
+                project_name VARCHAR(255) NOT NULL,
+                project_type INT NOT NULL,
                 project_id INT NOT NULL,
                 amount INT NOT NULL,
                 hold_price decimal NOT NULL comment 'price of the project when user hold it',
@@ -44,6 +49,7 @@ const initializeDB = async () => {
             )
         `;
         await connection.query(createInvestHoldTableQuery);
+        
 
         //create invest_type_enum table
         const createInvestTypeEnumQuery = `
@@ -68,6 +74,18 @@ const initializeDB = async () => {
                 FOREIGN KEY (project_id) REFERENCES invest_projects(id)
             )
         `;
+        await connection.query(createUserLogsTableQuery);
+
+        const createProjectLogsTableQuery = `
+            CREATE TABLE IF NOT EXISTS project_logs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                project_id INT NOT NULL,
+                action INT NOT NULL comment '1: create, 2: update, 3: delete',
+                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (project_id) REFERENCES invest_projects(id)
+            )
+        `;
+        await connection.query(createProjectLogsTableQuery);
 
         return { message: 'Database initialized and table created successfully' };
     } catch (error) {
