@@ -54,6 +54,21 @@ const initializeDB = async () => {
         `;
         await connection.query(createInvestTypeEnumQuery);
 
+        //create user_logs table
+        const createUserLogsTableQuery = `
+            CREATE TABLE IF NOT EXISTS user_logs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                action INT NOT NULL comment '1: pay, 2: sell',
+                project_id INT NOT NULL,
+                amount INT NOT NULL,
+                price decimal NOT NULL comment 'price of the project when user pay or sell it',
+                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (project_id) REFERENCES invest_projects(id)
+            )
+        `;
+
         return { message: 'Database initialized and table created successfully' };
     } catch (error) {
         console.error('Error initializing database:', error);

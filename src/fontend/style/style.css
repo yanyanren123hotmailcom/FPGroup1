@@ -1,0 +1,18 @@
+h1{
+    font-size: 2em;
+    color: orange;
+    text-align: center;
+    margin-top: 20px;
+}
+#phoneinput{
+    color: blue;
+    width: 300px;
+    height: 40px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+}
+body{
+  
+}
