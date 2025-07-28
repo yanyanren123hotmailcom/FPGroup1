@@ -24,7 +24,7 @@ const initializeDB = async () => {
             CREATE TABLE IF NOT EXISTS invest_projects (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 project_name VARCHAR(255) NOT NULL,
-                type INT NOT NULL,
+                type  VARCHAR(255) NOT NULL,
                 price decimal NOT NULL comment 'price of the project',
                 rate decimal NOT NULL comment 'rate of the project',
                 description TEXT NOT NULL,
@@ -51,14 +51,14 @@ const initializeDB = async () => {
         await connection.query(createInvestHoldTableQuery);
         
 
-        //create invest_type_enum table
-        const createInvestTypeEnumQuery = `
-            CREATE TABLE IF NOT EXISTS invest_type_enum (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                type_name VARCHAR(255) NOT NULL
-            )
-        `;
-        await connection.query(createInvestTypeEnumQuery);
+        // //create invest_type_enum table
+        // const createInvestTypeEnumQuery = `
+        //     CREATE TABLE IF NOT EXISTS invest_type_enum (
+        //         id INT AUTO_INCREMENT PRIMARY KEY,
+        //         type_name VARCHAR(255) NOT NULL
+        //     )
+        // `;
+        // await connection.query(createInvestTypeEnumQuery);
 
         //create user_logs table
         const createUserLogsTableQuery = `
