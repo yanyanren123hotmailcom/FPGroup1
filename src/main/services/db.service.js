@@ -40,7 +40,7 @@ const initializeDB = async () => {
                 user_id INT NOT NULL,
                 user_name VARCHAR(255) NOT NULL,
                 project_name VARCHAR(255) NOT NULL,
-                project_type INT NOT NULL,
+                project_type VARCHAR(255) NOT NULL,
                 project_id INT NOT NULL,
                 amount INT NOT NULL,
                 hold_price decimal NOT NULL comment 'price of the project when user hold it',

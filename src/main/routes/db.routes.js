@@ -6,4 +6,5 @@ const router = express.Router();
 router.get('/init', dbController.initDB);
 router.get('/seed-data', dbController.seedData);
 
-export default router;
+// export default router;
+export { router as dbRoutes };
