@@ -1,5 +1,5 @@
+import connection from '../config/db.js';
 
-const connection = require('../config/db.js');
 const initializeDB = async () => {
     try {
         // First check if the database exists
@@ -8,7 +8,7 @@ const initializeDB = async () => {
         // Use the database
         await connection.query('USE finance');
 
-        // 用户表
+        // Create the users table
         const createTableQuery = `
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -19,7 +19,7 @@ const initializeDB = async () => {
         `;
         await connection.query(createTableQuery);
 
-        //投资项目表
+        // Create the Invest table
         const createInvestTableQuery = `
             CREATE TABLE IF NOT EXISTS invest_projects (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -33,14 +33,14 @@ const initializeDB = async () => {
         `;
         await connection.query(createInvestTableQuery);
 
-        //投资持仓表
+        // Create the InvestHold table
         const createInvestHoldTableQuery = `
             CREATE TABLE IF NOT EXISTS invest_holds (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
                 user_name VARCHAR(255) NOT NULL,
                 project_name VARCHAR(255) NOT NULL,
-                project_type VARCHAR(255) NOT NULL,
+                project_type  VARCHAR(255) NOT NULL,
                 project_id INT NOT NULL,
                 amount INT NOT NULL,
                 hold_price decimal(10,4) NOT NULL comment 'price of the project when user hold it',
@@ -61,7 +61,6 @@ const initializeDB = async () => {
         // await connection.query(createInvestTypeEnumQuery);
 
         //create user_logs table
-        //用户日志表 user_logs
         const createUserLogsTableQuery = `
             CREATE TABLE IF NOT EXISTS user_logs (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -70,20 +69,21 @@ const initializeDB = async () => {
                 project_id INT NOT NULL,
                 amount INT NOT NULL,
                 price decimal(10,4) NOT NULL comment 'price of the project when user pay or sell it',
-                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP comment 'date of the log',
+                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id),
                 FOREIGN KEY (project_id) REFERENCES invest_projects(id)
             )
         `;
         await connection.query(createUserLogsTableQuery);
-        //项目日志表 (project_logs)
+
         const createProjectLogsTableQuery = `
             CREATE TABLE IF NOT EXISTS project_logs (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 project_id INT NOT NULL,
                 action INT NOT NULL comment '1: create, 2: update, 3: delete',
                 date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                rate decimal(10,4) NOT NULL comment 'rate of the project when action is taken',
+                rate decimal(10,4) NOT NULL comment 'rate of the project when log created',
+                price decimal(10,4) NOT NULL comment 'price of the project when log created',
                 FOREIGN KEY (project_id) REFERENCES invest_projects(id)
             )
         `;
@@ -98,42 +98,12 @@ const initializeDB = async () => {
 
 const seedData = async () => {
     try {
-        // First ensure the table exists
-        await initializeDB();
-
-        // Check if the table exists
-        const [tables] = await connection.query('SHOW TABLES LIKE "users"');
-
-        if (tables.length === 0) {
-            throw new Error('users table does not exist');
-        }
-
-        // Delete existing data instead of TRUNCATE
-        await connection.query('DELETE FROM users');
-
-        // // Sample cars data
-        // const cars = [
-        //     { car_name: 'Toyota Camry', color: 'Blue' },
-        //     { car_name: 'Honda Civic', color: 'Red' },
-        //     { car_name: 'Tesla Model 3', color: 'White' },
-        //     { car_name: 'Ford Mustang', color: 'Black' }
-        // ];
-
-        // // Insert each car
-        // for (const car of cars) {
-        //     await connection.query(
-        //         'INSERT INTO cars (car_name, color) VALUES (?, ?)',
-        //         [car.car_name, car.color]
-        //     );
-        // }
-
-        return { message: 'Sample cars added successfully', count: cars.length };
+        
     } catch (error) {
         console.error('Error seeding cars:', error);
         throw error;
     }
 };
 
-
-module.exports = { initializeDB, seedData };
+export { initializeDB, seedData };
 
