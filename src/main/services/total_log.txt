@@ -1,0 +1,256 @@
+INSERT INTO users (user_name, current_funds, current_earnings) VALUES
+('John Doe', 135844, 0);  -- 用户当前资金 135844
+
+
+-- 1. 更新用户资金和收益：2025-07-25
+UPDATE users
+SET 
+    current_funds = 113506,  -- 当前资金
+    current_earnings = 0     -- 当前收益
+WHERE user_name = 'John Doe';
+
+-- 2. 更新用户资金和收益：2025-07-26
+UPDATE users
+SET 
+    current_funds = 117530.80,  -- 当前资金
+    current_earnings = -70.20   -- 当前收益
+WHERE user_name = 'John Doe';
+
+-- 3. 更新用户资金和收益：2025-07-27
+UPDATE users
+SET 
+    current_funds = 108540.80,  -- 当前资金
+    current_earnings = -70.20   -- 当前收益
+WHERE user_name = 'John Doe';
+
+-- 4. 更新用户资金和收益：2025-07-28
+UPDATE users
+SET 
+    current_funds = 113055.80,  -- 当前资金
+    current_earnings = -50.20   -- 当前收益 (计算了阿里巴巴的盈利)
+WHERE user_name = 'John Doe';
+-- 插入 invest_projects 数据
+-- Apple Inc.
+INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
+('Apple Inc.', 'Stock', 136.50, 0.025, 'Leading technology company');
+-- Tesla Motors
+INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
+('Tesla Motors', 'Stock', 775.65, 0.030, 'Electric vehicle and energy company');
+-- Alibaba Group
+INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
+('Alibaba Group', 'Stock', 89.90, 0.015, 'Chinese multinational conglomerate');
+-- Vanguard S&P 500
+INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
+('Vanguard S&P 500', 'Fund', 436.46, -0.011, 'Index fund tracking S&P 500');
+-- Fidelity Growth Fund
+INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
+('Fidelity Growth Fund', 'Fund', 147.00, 0.019, 'Growth stock fund');
+-- BlackRock Bond Index
+INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
+('BlackRock Bond Index', 'Bond', 100.37, 0.006, 'Bond index fund');
+-- US Treasury 10Y
+INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
+('US Treasury 10Y', 'Bond', 101.75, 0.004, 'US government 10-year treasury bond');
+-- Corporate AAA Bond
+INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
+('Corporate AAA Bond', 'Bond', 104.42, 0.007, 'Corporate bond index');
+-- Municipal Bond Fund
+INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
+('Municipal Bond Fund', 'Bond', 97.78, -0.008, 'Fund focusing on municipal bonds');
+-- Green Energy Bond
+INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
+('Green Energy Bond', 'Bond', 100.75, 0.011, 'Sustainable energy bond fund');
+
+-- 插入 invest_holds 数据 (2025-07-25 到 2025-07-28)
+
+-- Apple Inc.
+-- 用户1购买了50股苹果股票，买入价136.50，总投入金额为 50 * 136.50 = 6825
+INSERT INTO invest_holds (user_id, user_name, project_name, project_type, project_id, amount, hold_price) VALUES
+(1, 'John Doe', 'Apple Inc.', 'stock', 1, 20, 20 * 136.50);
+
+-- Tesla Motors
+-- 用户1购买了20股特斯拉股票，买入价775.65，总投入金额为 20 * 775.65 = 15513
+INSERT INTO invest_holds (user_id, user_name, project_name, project_type, project_id, amount, hold_price) VALUES
+(1, 'John Doe', 'Tesla Motors', 'stock', 2, 10, 10 * 775.65);
+
+-- Alibaba Group
+-- 用户1购买了100股阿里巴巴股票，买入价89.90，总投入金额为 100 * 89.90 = 8990
+INSERT INTO invest_holds (user_id, user_name, project_name, project_type, project_id, amount, hold_price) VALUES
+(1, 'John Doe', 'Alibaba Group', 'stock', 3, 50, 50 * 89.90);
+
+-- Vanguard S&P 500
+-- 用户1购买了200股Vanguard S&P 500基金，买入价436.46，总投入金额为 200 * 436.46 = 87292
+INSERT INTO invest_holds (user_id, user_name, project_name, project_type, project_id, amount, hold_price) VALUES
+(1, 'John Doe', 'Vanguard S&P 500', 'fund', 4, 100, 100 * 436.46);
+
+-- Fidelity Growth Fund
+-- 用户1购买了150股Fidelity Growth Fund基金，买入价147.00，总投入金额为 150 * 147.00 = 22050
+INSERT INTO invest_holds (user_id, user_name, project_name, project_type, project_id, amount, hold_price) VALUES
+(1, 'John Doe', 'Fidelity Growth Fund', 'fund', 5, 75, 75 * 147.00);
+
+-- BlackRock Bond Index
+-- 用户1购买了200股BlackRock Bond Index债券，买入价100.37，总投入金额为 200 * 100.37 = 20074
+INSERT INTO invest_holds (user_id, user_name, project_name, project_type, project_id, amount, hold_price) VALUES
+(1, 'John Doe', 'BlackRock Bond Index', 'bond', 6, 100, 100 * 100.37);
+
+-- US Treasury 10Y
+-- 用户1购买了150股US Treasury 10Y债券，买入价101.75，总投入金额为 150 * 101.75 = 15262.50
+INSERT INTO invest_holds (user_id, user_name, project_name, project_type, project_id, amount, hold_price) VALUES
+(1, 'John Doe', 'US Treasury 10Y', 'bond', 7, 75, 75 * 101.75);
+
+-- Corporate AAA Bond
+-- 用户1购买了100股Corporate AAA Bond债券，买入价104.42，总投入金额为 100 * 104.42 = 10442
+INSERT INTO invest_holds (user_id, user_name, project_name, project_type, project_id, amount, hold_price) VALUES
+(1, 'John Doe', 'Corporate AAA Bond', 'bond', 8, 50, 50 * 104.42);
+
+-- Municipal Bond Fund
+-- 用户1购买了120股Municipal Bond Fund债券，买入价97.78，总投入金额为 120 * 97.78 = 11733.60
+INSERT INTO invest_holds (user_id, user_name, project_name, project_type, project_id, amount, hold_price) VALUES
+(1, 'John Doe', 'Municipal Bond Fund', 'bond', 9, 60, 60 * 97.78);
+
+-- Green Energy Bond
+-- 用户1购买了100股Green Energy Bond债券，买入价100.75，总投入金额为 100 * 100.75 = 10075
+INSERT INTO invest_holds (user_id, user_name, project_name, project_type, project_id, amount, hold_price) VALUES
+(1, 'John Doe', 'Green Energy Bond', 'bond', 10, 50, 50 * 100.75);
+
+-- 插入 user_logs 数据
+-- Apple Inc.
+INSERT INTO user_logs (user_id, action, project_id, amount, price, date) VALUES
+(1, 1, 1, 50, 136.50, '2025-07-25 09:10:00'),
+(1, 2, 1, 50, 133.77, '2025-07-26 09:15:00'),
+(1, 1, 1, 30, 135.38, '2025-07-27 09:30:00'),
+(1, 2, 1, 30, 134.16, '2025-07-28 09:50:00');
+
+-- Tesla Motors
+INSERT INTO user_logs (user_id, action, project_id, amount, price, date) VALUES
+(1, 1, 2, 20, 775.65, '2025-07-25 10:10:00'),
+(1, 2, 2, 20, 764.27, '2025-07-26 10:45:00'),
+(1, 1, 2, 10, 779.56, '2025-07-27 11:20:00'),
+(1, 2, 2, 10, 771.77, '2025-07-28 11:50:00');
+
+-- Alibaba Group
+INSERT INTO user_logs (user_id, action, project_id, amount, price, date) VALUES
+(1, 1, 3, 100, 89.90, '2025-07-25 10:20:00'),
+(1, 2, 3, 100, 88.90, '2025-07-26 11:05:00'),
+(1, 1, 3, 50, 90.10, '2025-07-27 12:00:00'),
+(1, 2, 3, 50, 89.90, '2025-07-28 12:40:00');
+
+-- Vanguard S&P 500
+INSERT INTO user_logs (user_id, action, project_id, amount, price, date) VALUES
+(1, 1, 4, 200, 436.46, '2025-07-25 11:00:00'),
+(1, 2, 4, 200, 437.77, '2025-07-26 11:30:00'),
+(1, 1, 4, 100, 434.12, '2025-07-27 12:15:00'),
+(1, 2, 4, 100, 438.14, '2025-07-28 12:50:00');
+
+-- Fidelity Growth Fund
+INSERT INTO user_logs (user_id, action, project_id, amount, price, date) VALUES
+(1, 1, 5, 150, 147.00, '2025-07-25 10:35:00'),
+(1, 2, 5, 150, 148.10, '2025-07-26 11:20:00'),
+(1, 1, 5, 75, 146.50, '2025-07-27 12:10:00'),
+(1, 2, 5, 75, 148.50, '2025-07-28 12:55:00');
+
+-- BlackRock Bond Index
+INSERT INTO user_logs (user_id, action, project_id, amount, price, date) VALUES
+(1, 1, 6, 200, 100.37, '2025-07-25 09:25:00'),
+(1, 2, 6, 200, 100.10, '2025-07-26 10:05:00'),
+(1, 1, 6, 100, 100.60, '2025-07-27 10:40:00'),
+(1, 2, 6, 100, 100.50, '2025-07-28 11:10:00');
+
+-- US Treasury 10Y
+INSERT INTO user_logs (user_id, action, project_id, amount, price, date) VALUES
+(1, 1, 7, 150, 101.75, '2025-07-25 09:30:00'),
+(1, 2, 7, 150, 101.80, '2025-07-26 10:15:00'),
+(1, 1, 7, 75, 101.50, '2025-07-27 11:00:00'),
+(1, 2, 7, 75, 101.85, '2025-07-28 11:20:00');
+
+-- Corporate AAA Bond
+INSERT INTO user_logs (user_id, action, project_id, amount, price, date) VALUES
+(1, 1, 8, 100, 104.42, '2025-07-25 09:40:00'),
+(1, 2, 8, 100, 104.15, '2025-07-26 10:30:00'),
+(1, 1, 8, 50, 104.30, '2025-07-27 11:05:00'),
+(1, 2, 8, 50, 104.50, '2025-07-28 11:40:00');
+
+-- Municipal Bond Fund
+INSERT INTO user_logs (user_id, action, project_id, amount, price, date) VALUES
+(1, 1, 9, 120, 97.78, '2025-07-25 10:50:00'),
+(1, 2, 9, 120, 97.85, '2025-07-26 11:10:00'),
+(1, 1, 9, 60, 97.70, '2025-07-27 12:00:00'),
+(1, 2, 9, 60, 97.80, '2025-07-28 12:30:00');
+
+-- Green Energy Bond
+INSERT INTO user_logs (user_id, action, project_id, amount, price, date) VALUES
+(1, 1, 10, 100, 100.75, '2025-07-25 09:55:00'),
+(1, 2, 10, 100, 101.00, '2025-07-26 10:40:00'),
+(1, 1, 10, 50, 101.10, '2025-07-27 11:30:00'),
+(1, 2, 10, 50, 100.90, '2025-07-28 12:20:00');
+
+-- 插入 project_logs 数据
+-- Apple Inc.
+INSERT INTO project_logs (project_id, action, date, rate, price) VALUES
+(1, 2, '2025-07-25 09:10:00', 0.025, 136.50),
+(1, 2, '2025-07-26 09:15:00', -0.020, 133.77),
+(1, 2, '2025-07-27 09:30:00', 0.012, 135.38),
+(1, 2, '2025-07-28 09:50:00', -0.009, 134.16);
+
+-- Tesla Motors
+INSERT INTO project_logs (project_id, action, date, rate, price) VALUES
+(2, 2, '2025-07-25 10:10:00', 0.030, 775.65),
+(2, 2, '2025-07-26 10:45:00', -0.015, 764.27),
+(2, 2, '2025-07-27 11:20:00', 0.020, 779.56),
+(2, 2, '2025-07-28 11:50:00', -0.010, 771.77);
+
+-- Alibaba Group
+INSERT INTO project_logs (project_id, action, date, rate, price) VALUES
+(3, 2, '2025-07-25 10:20:00', 0.015, 89.90),
+(3, 2, '2025-07-26 11:05:00', -0.010, 88.90),
+(3, 2, '2025-07-27 12:00:00', 0.008, 90.10),
+(3, 2, '2025-07-28 12:40:00', -0.005, 89.90);
+
+-- Vanguard S&P 500
+INSERT INTO project_logs (project_id, action, date, rate, price) VALUES
+(4, 2, '2025-07-25 11:00:00', -0.011, 436.46),
+(4, 2, '2025-07-26 11:30:00', 0.008, 437.77),
+(4, 2, '2025-07-27 12:15:00', -0.003, 434.12),
+(4, 2, '2025-07-28 12:50:00', 0.005, 438.14);
+
+-- Fidelity Growth Fund
+INSERT INTO project_logs (project_id, action, date, rate, price) VALUES
+(5, 2, '2025-07-25 10:35:00', 0.019, 147.00),
+(5, 2, '2025-07-26 11:20:00', 0.022, 148.10),
+(5, 2, '2025-07-27 12:10:00', -0.010, 146.50),
+(5, 2, '2025-07-28 12:55:00', 0.015, 148.50);
+
+-- BlackRock Bond Index
+INSERT INTO project_logs (project_id, action, date, rate, price) VALUES
+(6, 2, '2025-07-25 09:25:00', 0.006, 100.37),
+(6, 2, '2025-07-26 10:05:00', -0.005, 100.10),
+(6, 2, '2025-07-27 10:40:00', 0.008, 100.60),
+(6, 2, '2025-07-28 11:10:00', 0.004, 100.50);
+
+-- US Treasury 10Y
+INSERT INTO project_logs (project_id, action, date, rate, price) VALUES
+(7, 2, '2025-07-25 09:30:00', 0.004, 101.75),
+(7, 2, '2025-07-26 10:15:00', 0.005, 101.80),
+(7, 2, '2025-07-27 11:00:00', -0.003, 101.50),
+(7, 2, '2025-07-28 11:20:00', 0.006, 101.85);
+
+-- Corporate AAA Bond
+INSERT INTO project_logs (project_id, action, date, rate, price) VALUES
+(8, 2, '2025-07-25 09:40:00', 0.007, 104.42),
+(8, 2, '2025-07-26 10:30:00', 0.005, 104.15),
+(8, 2, '2025-07-27 11:05:00', -0.002, 104.30),
+(8, 2, '2025-07-28 11:40:00', 0.003, 104.50);
+
+-- Municipal Bond Fund
+INSERT INTO project_logs (project_id, action, date, rate, price) VALUES
+(9, 2, '2025-07-25 10:50:00', -0.008, 97.78),
+(9, 2, '2025-07-26 11:10:00', 0.004, 97.85),
+(9, 2, '2025-07-27 12:00:00', -0.005, 97.70),
+(9, 2, '2025-07-28 12:30:00', 0.003, 97.80);
+
+-- Green Energy Bond
+INSERT INTO project_logs (project_id, action, date, rate, price) VALUES
+(10, 2, '2025-07-25 09:55:00', 0.011, 100.75),
+(10, 2, '2025-07-26 10:40:00', 0.015, 101.00),
+(10, 2, '2025-07-27 11:30:00', 0.008, 101.10),
+(10, 2, '2025-07-28 12:20:00', -0.004, 100.90);
