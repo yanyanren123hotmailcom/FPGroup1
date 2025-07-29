@@ -40,7 +40,7 @@ const initializeDB = async () => {
                 user_id INT NOT NULL,
                 user_name VARCHAR(255) NOT NULL,
                 project_name VARCHAR(255) NOT NULL,
-                project_type INT NOT NULL,
+                project_type  VARCHAR(255) NOT NULL,
                 project_id INT NOT NULL,
                 amount INT NOT NULL,
                 hold_price decimal NOT NULL comment 'price of the project when user hold it',
@@ -82,6 +82,8 @@ const initializeDB = async () => {
                 project_id INT NOT NULL,
                 action INT NOT NULL comment '1: create, 2: update, 3: delete',
                 date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                rate decimal NOT NULL comment 'rate of the project when log created',
+                price decimal NOT NULL comment 'price of the project when log created',
                 FOREIGN KEY (project_id) REFERENCES invest_projects(id)
             )
         `;
@@ -96,36 +98,7 @@ const initializeDB = async () => {
 
 const seedData = async () => {
     try {
-        // First ensure the table exists
-        await initializeDB();
-
-        // Check if the table exists
-        const [tables] = await connection.query('SHOW TABLES LIKE "users"');
-
-        if (tables.length === 0) {
-            throw new Error('users table does not exist');
-        }
-
-        // Delete existing data instead of TRUNCATE
-        await connection.query('DELETE FROM users');
-
-        // // Sample cars data
-        // const cars = [
-        //     { car_name: 'Toyota Camry', color: 'Blue' },
-        //     { car_name: 'Honda Civic', color: 'Red' },
-        //     { car_name: 'Tesla Model 3', color: 'White' },
-        //     { car_name: 'Ford Mustang', color: 'Black' }
-        // ];
-
-        // // Insert each car
-        // for (const car of cars) {
-        //     await connection.query(
-        //         'INSERT INTO cars (car_name, color) VALUES (?, ?)',
-        //         [car.car_name, car.color]
-        //     );
-        // }
-
-        return { message: 'Sample cars added successfully', count: cars.length };
+        
     } catch (error) {
         console.error('Error seeding cars:', error);
         throw error;
