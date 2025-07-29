@@ -851,17 +851,17 @@
                     <span class="modal-label">持有份数</span>
                     <span class="modal-value" id="modalShares">--</span>
                 </div>
-                <div class="modal-row">
+                <!-- <div class="modal-row">
                     <span class="modal-label">当前单价</span>
                     <span class="modal-value" id="modalCurrentPrice">--</span>
-                </div>
-                <div class="modal-row">
+                </div> -->
+                <!-- <div class="modal-row">
                     <span class="modal-label">当前市值</span>
                     <span class="modal-value" id="modalValue">--</span>
-                </div>
+                </div> -->
                 <div class="modal-row">
-                    <span class="modal-label">收益</span>
-                    <span class="modal-value" id="modalProfit">--</span>
+                    <span class="modal-label">Rate</span>
+                    <span class="modal-value" id="modalRate">--</span>
                 </div>
             </div>
             
@@ -1087,20 +1087,25 @@
         }
         
         // 打开已投资项目模态框
-        function openInvestedModal(project) {
+        async function openInvestedModal(project) {
             activeProject = project;
+            const url = PROJECT_DETAIL_API_URL + activeProject.project_id;
+            const response = await fetch(url);
+            const project1 = await response.json();
+            //fetchProjectDetail(activeProject.project_id);
+
             
-            document.getElementById('modalTitle').textContent = project.name;
-            document.getElementById('modalBuyPrice').textContent = `¥${formatPrice(project.buyPrice)}`;
-            document.getElementById('modalShares').textContent = project.shares;
-            document.getElementById('modalCurrentPrice').textContent = `¥${formatPrice(project.currentPrice)}`;
+            document.getElementById('modalTitle').textContent = project1.project_name;
+            document.getElementById('modalBuyPrice').textContent = `¥${formatPrice(project1.price)}`;
+            document.getElementById('modalShares').textContent = activeProject.amount;
+            //document.getElementById('modalCurrentPrice').textContent = `¥${formatPrice(project.currentPrice)}`;
             
-            const value = project.shares * project.currentPrice;
-            document.getElementById('modalValue').textContent = `¥${formatPrice(value)}`;
+          //  const value = project.shares * project.currentPrice;
+           // document.getElementById('modalValue').textContent = `¥${formatPrice(value)}`;
             
-            const profit = value - project.shares * project.buyPrice;
-            document.getElementById('modalProfit').textContent = `${profit >= 0 ? '+' : '-'}¥${formatPrice(Math.abs(profit))}`;
-            document.getElementById('modalProfit').className = `modal-value ${profit >= 0 ? 'profit' : 'loss'}`;
+        //    const profit = value - project.shares * project.buyPrice;
+            document.getElementById('modalRate').textContent = project1.rate ;
+           // document.getElementById('modalProfit').className = `modal-value ${profit >= 0 ? 'profit' : 'loss'}`;
             
             document.getElementById('buyAmount').value = 0;
             document.getElementById('sellAmount').value = 0;
@@ -1309,30 +1314,32 @@
         
         // 买入更多份额
         async function buyMore() {
+            const currentProject = null;
             const amount = +document.getElementById('buyAmount').value;
             if (amount <= 0) {
                 alert('请输入正数');
                 return;
             }
+
             
             try {
                 // 调用API买入更多份额
-                const response = await fetch(`http://localhost:3000/user/1/project/${activeProject.id}/buy`, {
-                    method: 'POST',
+                const response = await fetch(`http://localhost:3000/user/1/invest/${activeProject.project_id}`, {
+                    method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ amount })
-                });
+                    body: JSON.stringify({ "amount": amount ,"action":"buy"}),
+                }).then(response => response.json());
                 
-                if (!response.ok) {
+                if (!response.message) {
                     throw new Error('买入操作失败');
                 }
                 
                 // 重新加载用户数据
                 await fetchUserData();
                 closeInvestedModal();
-                alert(`成功买入 ${activeProject.name} ${amount} 份！`);
+                alert(`成功买入 ${activeProject.project_name} ${amount} 份！`);
             } catch (error) {
                 console.error('买入操作失败:', error);
                 alert('买入操作失败，请稍后重试');

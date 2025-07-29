@@ -19,6 +19,8 @@ export const getUserProjectList= async (req, res) => {
 //购买投资项目
 export const updateUserProject = async (req, res) => {
     const { user_id,project_id } = req.params;
+    console.log(req);
+    console.log(req.body);
     const { action, amount } = req.body;
     console.log(`Updating project for user ${user_id}, project ${project_id}, action: ${action}, amount: ${amount}`);
 
