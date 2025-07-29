@@ -1,74 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-cn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Document</title>
-    <link rel="stylesheet" href="style/style.css">
+  <meta charset="UTF-8" />
+  <title>我的投资</title>
+  <style>
+    /* 与上一版样式完全一致，省略 */
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;}
+    #app{display:flex;height:100vh}
+    .left{flex:0 0 360px;background:#fff;border-right:1px solid #ddd;display:flex;flex-direction:column}
+    .header{padding:20px;border-bottom:1px solid #eee}
+    .list{flex:1;overflow:auto;padding:10px}
+    .item{display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid #eee;margin-bottom:8px;border-radius:4px;cursor:pointer}
+    .item:hover{background:#fafafa}
+    .profit{color:#0a0}
+    .loss{color:#c00}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);align-items:center;justify-content:center}
+    .modal-content{background:#fff;padding:20px;border-radius:6px;width:400px;max-width:90%}
+    input[type=number]{width:100%;margin:4px 0}
+    button{margin-right:6px}
+  </style>
 </head>
 <body>
-    <!--  标题-->
-    <h1>hello</h1>
-    <!--  段落 -->
-    <p></p>
-    <!--  换行 -->
-    <br>
-    <p>Lorem ipsum <small>color</small> sit amet consectetur <em>adipisicing</em> elit. Officia earum, neque quam fugiat impedit dolores. Cum voluptas magni porro, ipsam totam magnam eaque, nisi saepe odit suscipit accusamus illo fugiat.</p>
+<div id="app">
+  <div class="left">
+    <div class="header">
+      <h3 id="userName">--</h3>
+      <p>ID：<span id="userId">--</span></p>
+      <p>current funds：<span id="cash">--</span> 元</p>
+      <p>current earnings：<span id="invested">--</span> 元</p>
+    </div>
+    <div class="list" id="projectList">加载中...</div>
+  </div>
 
-    <!--  链接 -->
-    <a href="https://www.baidu.com">百度</a><br>
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h4 id="modalTitle"></h4>
+      <p>买入均价：<span id="modalBuyPrice"></span> 元/份</p>
+      <p>持有份数：<span id="modalShares"></span></p>
+      <p>当前单价：<span id="modalCurrentPrice"></span> 元/份</p>
+      <p>当前市值：<span id="modalValue"></span> 元</p>
+      <p>收益：<span id="modalProfit"></span> 元</p>
+      <hr>
+      <label>继续买入份数：<input type="number" id="buyAmount" min="0" value="0"></label>
+      <button onclick="buyMore()">确认买入</button><br>
+      <label>卖出份数：<input type="number" id="sellAmount" min="0" value="0"></label>
+      <button onclick="sellShares()">确认卖出</button><br><br>
+      <button onclick="closeModal()">关闭</button>
+    </div>
+  </div>
+</div>
 
-    <img src="images/zhuzhuxia.png" alt="打不开image" width="200" height="200"><br>
+<script>
+  const API = {
+    user:   () => fetch('http://localhost:3000/user/1').then(r=>r.json()),
+    list:   () => fetch('http://localhost:3000/user/1/project/list').then(r=>r.json()),
+    buy:  (id,amount) => fetch(`http://localhost:3000/user/1/project/${id}/buy`,  {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount})}),
+    sell: (id,amount) => fetch(`http://localhost:3000/user/1/project/${id}/sell`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount})})
+  };
 
+  let user = API.user();
 
-    <form action="ex01.html">
-        <label for="passwordinput">Contant</label><br>
+  let projects = [];
+  let activeProject = null;
 
-        <label for="usernameinput">Full Name</label>
-        <input type="text" id="usernameinput" name="usernameinput" placeholder="请输入用户名"><br>
+  /* 工具 */
+  const fmt = n=>n.toFixed(2);
+  const investedBalance = ()=>projects.reduce((s,p)=>s+p.shares*p.buyPrice,0);
 
-        <label for="usernameinput">Email Address</label>
-        <input type="text" id="emailinput" name="emailinput" placeholder="请输入邮箱地址"><br>
+  /* 渲染 */
+  function renderUser(){
+    document.getElementById('userName').textContent = user[0].user_name;
+    document.getElementById('userId').textContent   = user[0].id;
+    document.getElementById('cash').textContent     = user[0].current_funds;
+    document.getElementById('invested').textContent = user[0].current_earnings;
+  }
+  function renderList(){
+    const box = document.getElementById('projectList');
+    if(!projects.length){ box.innerHTML='暂无项目'; return;}
+    box.innerHTML='';
+    projects.forEach(p=>{
+      const value = p.shares * p.currentPrice;
+      const profit = value - p.shares*p.buyPrice;
+      const div = document.createElement('div');
+      div.className='item';
+      div.innerHTML = `
+        <div>${p.name}</div>
+        <div class="${profit>=0?'profit':'loss'}">${fmt(profit)} 元</div>
+      `;
+      div.onclick = ()=>openModal(p);
+      box.appendChild(div);
+    });
+  }
 
-        <label for="usernameinput">Full Name</label>
-        <input type="em" id="usernameinput" name="usernameinput" placeholder="请输入用户名"><br>
+  /* 弹窗 */
+  function openModal(p){
+    activeProject = p;
+    document.getElementById('modalTitle').textContent = p.name;
+    document.getElementById('modalBuyPrice').textContent   = fmt(p.buyPrice);
+    document.getElementById('modalShares').textContent     = p.shares;
+    document.getElementById('modalCurrentPrice').textContent = fmt(p.currentPrice);
+    const value = p.shares * p.currentPrice;
+    document.getElementById('modalValue').textContent  = fmt(value);
+    document.getElementById('modalProfit').textContent = fmt(value - p.shares*p.buyPrice);
+    document.getElementById('buyAmount').value = 0;
+    document.getElementById('sellAmount').value = 0;
+    document.getElementById('modal').style.display='flex';
+  }
+  function closeModal(){ document.getElementById('modal').style.display='none'; }
 
-        <label for="usernameinput">Phone Number</label>
-        <input type="tel" id="phoneinput" name="phoneinput" placeholder="请输入联系方式"><br>
+  /* 买入 / 卖出 */
+  async function buyMore(){
+    const amount = +document.getElementById('buyAmount').value;
+    if(amount<=0) return alert('请输入正数');
+    await API.buy(activeProject.id, amount);
+    await loadAll();
+    closeModal();
+  }
+  async function sellShares(){
+    const amount = +document.getElementById('sellAmount').value;
+    if(amount<=0) return alert('请输入正数');
+    if(amount>activeProject.shares) return alert('超出持有份数');
+    await API.sell(activeProject.id, amount);
+    await loadAll();
+    closeModal();
+  }
 
-    </form>
-
-    <table border="1">
-        <thead >
-            <tr>
-                <th>姓名</th>
-                <th>年龄</th>
-                <th>性别</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>张三</td>
-                <td>18</td>
-                <td>男</td>
-            </tr>
-            <tr>
-                <td>李四</td>
-                <td>20</td>
-                <td>女</td>
-            </tr>
-        </tbody>
-    </table>
-    <ul>
-        <li>列表1</li>
-        <li>列表2</li>
-        <li>列表3</li>
-    </ul>
-    <ol>
-        <li>有序列表1</li>
-        <li>有序列表2</li>
-        <li>有序列表3</li>
-    </ol>           
+  /* 初始化：先拉用户，再拉项目 */
+  async function loadAll(){
+    user = await API.user();
+    //projects = await API.list();
+    renderUser();
+    renderList();
+  }
+  loadAll();
+</script>
 </body>
 </html>
