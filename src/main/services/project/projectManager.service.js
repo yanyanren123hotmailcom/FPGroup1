@@ -11,17 +11,17 @@ const getProjectById = async (id) => {
 };
 
 const getProjectByName = async (name) => {
-    const [rows] = await connection.query('SELECT * FROM invest_projects WHERE project_name = ?', [n]);
+    const [rows] = await connection.query('SELECT * FROM invest_projects WHERE project_name = ?', [name]);
     return rows[0];
 };
 
 const createProject = async (projectData) => {
-    const {  project_name, type, rate, price } = projectData;
+    const {  project_name, type, price, rate,description,start_date } = projectData;
     const [result] = await connection.query(
-        'INSERT INTO invest_projects (project_name, type, rate, price) VALUES (?, ?)',
-        [project_name, type, rate, price]
+        'INSERT INTO invest_projects (project_name, type,price, rate, description,start_date) VALUES (?, ?, ?, ?, ?, ?)',
+        [project_name, type,price, rate, description,start_date]
     );
-    return { message: 'Car added successfully', id: result.insertId };
+    return { message: 'Project added successfully', id: result.insertId };
 };
 
 const updateProjectPrice = async (id, projectData) => {

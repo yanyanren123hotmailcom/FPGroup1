@@ -15,7 +15,7 @@ export const getProjectById = async (req, res) => {
         const project = await projectManagerService.getProjectById(id);
 
         if (!project) {
-            return res.status(404).json({ error: 'Car not found' });
+            return res.status(404).json({ error: 'Project not found' });
         }
 
         res.json(project);
@@ -30,7 +30,7 @@ export const getProjectByName = async (req, res) => {
         const project = await projectManagerService.getProjectByName(name);
 
         if (!project) {
-            return res.status(404).json({ error: 'Car not found' });
+            return res.status(404).json({ error: 'Project not found' });
         }
 
         res.json(project);
@@ -41,11 +41,10 @@ export const getProjectByName = async (req, res) => {
 
 export const createInvest = async (req, res) => {
     try {
-        const { project_name, type, rate, price } = req.body;
-        if ( !project_name|| !type|| !rate|| !price ) {
+        const { project_name, type, price, rate,description,start_date } = req.body;
+        if ( !project_name|| !type|| !price|| !rate||  !description||!start_date ) {
             return res.status(400).json({ error: 'Please provide complete information about project' });
         }
-
         const result = await projectManagerService.createProject(req.body);
         res.status(201).json(result);
     } catch (error) {
