@@ -20,7 +20,9 @@ userRoutes.get('/:user_id/invest/list', userProjectManager.getUserProjectList);
 // userRoutes.get('/:user_id/invest/type_name=:type_name', userProjectManager.getUserProjectByTypeName);
 // userRoutes.get('/:user_id/invest/type', userProjectManager.getUserProjectLossAndProfit);
 // userRoutes.post('/:user_id/invest', userProjectManager.createUserProject);
-// userRoutes.patch('/:user_id/invest/:project_id', userProjectManager.updateUserProject);
+userRoutes.patch('/:user_id/invest/:project_id', userProjectManager.updateUserProject);
+// userRoutes.post('/:user_id/invest/buy', userProjectManager.buyInvestmentProject);
+// userRoutes.delete('/:user_id/invest/:project_id', userProjectManager.deleteUserProject);
 
 
 export default userRoutes;
