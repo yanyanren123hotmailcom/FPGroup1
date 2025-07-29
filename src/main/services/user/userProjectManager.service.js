@@ -17,7 +17,7 @@ import connection from '../../config/db.js'; // 数据库连接配置
       }
 
       // 调用DAO层查询（示例查询）
-      const projects = await connection.query(`
+      const [projects] = await connection.query(`
         SELECT * 
         FROM invest_holds 
         WHERE user_id = ? `, 

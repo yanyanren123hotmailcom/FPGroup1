@@ -7,28 +7,28 @@ UPDATE users
 SET 
     current_funds = 113506,  -- 当前资金
     current_earnings = 0     -- 当前收益
-WHERE user_name = 'John Doe';
+WHERE id = 1;
 
 -- 2. 更新用户资金和收益：2025-07-26
 UPDATE users
 SET 
     current_funds = 117530.80,  -- 当前资金
     current_earnings = -70.20   -- 当前收益
-WHERE user_name = 'John Doe';
+WHERE id = 2;
 
 -- 3. 更新用户资金和收益：2025-07-27
 UPDATE users
 SET 
     current_funds = 108540.80,  -- 当前资金
     current_earnings = -70.20   -- 当前收益
-WHERE user_name = 'John Doe';
+WHERE id = 3;
 
 -- 4. 更新用户资金和收益：2025-07-28
 UPDATE users
 SET 
     current_funds = 113055.80,  -- 当前资金
     current_earnings = -50.20   -- 当前收益 (计算了阿里巴巴的盈利)
-WHERE user_name = 'John Doe';
+WHERE id = 4;
 -- 插入 invest_projects 数据
 -- Apple Inc.
 INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
