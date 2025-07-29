@@ -1,5 +1,5 @@
-import connection from '../config/db.js';
 
+const connection = require('../config/db.js');
 const initializeDB = async () => {
     try {
         // First check if the database exists
@@ -8,42 +8,42 @@ const initializeDB = async () => {
         // Use the database
         await connection.query('USE finance');
 
-        // Create the users table
+        // 用户表
         const createTableQuery = `
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_name VARCHAR(255) NOT NULL,
-                current_funds decimal NOT NULL,
-                current_earnings decimal NOT NULL
+                current_funds decimal(10,4) NOT NULL,
+                current_earnings decimal(10,4) NOT NULL
             )
         `;
         await connection.query(createTableQuery);
 
-        // Create the Invest table
+        //投资项目表
         const createInvestTableQuery = `
             CREATE TABLE IF NOT EXISTS invest_projects (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 project_name VARCHAR(255) NOT NULL,
                 type  VARCHAR(255) NOT NULL,
-                price decimal NOT NULL comment 'price of the project',
-                rate decimal NOT NULL comment 'rate of the project',
+                price decimal(10,4) NOT NULL comment 'price of the project',
+                rate decimal(10,4) NOT NULL comment 'rate of the project',
                 description TEXT NOT NULL,
                 start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `;
         await connection.query(createInvestTableQuery);
 
-        // Create the InvestHold table!
+        //投资持仓表
         const createInvestHoldTableQuery = `
             CREATE TABLE IF NOT EXISTS invest_holds (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
                 user_name VARCHAR(255) NOT NULL,
                 project_name VARCHAR(255) NOT NULL,
-                project_type INT NOT NULL,
+                project_type VARCHAR(255) NOT NULL,
                 project_id INT NOT NULL,
                 amount INT NOT NULL,
-                hold_price decimal NOT NULL comment 'price of the project when user hold it',
+                hold_price decimal(10,4) NOT NULL comment 'price of the project when user hold it',
                 FOREIGN KEY (user_id) REFERENCES users(id),
                 FOREIGN KEY (project_id) REFERENCES invest_projects(id)
             )
@@ -61,6 +61,7 @@ const initializeDB = async () => {
         // await connection.query(createInvestTypeEnumQuery);
 
         //create user_logs table
+        //用户日志表 user_logs
         const createUserLogsTableQuery = `
             CREATE TABLE IF NOT EXISTS user_logs (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -68,20 +69,21 @@ const initializeDB = async () => {
                 action INT NOT NULL comment '1: pay, 2: sell',
                 project_id INT NOT NULL,
                 amount INT NOT NULL,
-                price decimal NOT NULL comment 'price of the project when user pay or sell it',
-                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                price decimal(10,4) NOT NULL comment 'price of the project when user pay or sell it',
+                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP comment 'date of the log',
                 FOREIGN KEY (user_id) REFERENCES users(id),
                 FOREIGN KEY (project_id) REFERENCES invest_projects(id)
             )
         `;
         await connection.query(createUserLogsTableQuery);
-
+        //项目日志表 (project_logs)
         const createProjectLogsTableQuery = `
             CREATE TABLE IF NOT EXISTS project_logs (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 project_id INT NOT NULL,
                 action INT NOT NULL comment '1: create, 2: update, 3: delete',
                 date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                rate decimal(10,4) NOT NULL comment 'rate of the project when action is taken',
                 FOREIGN KEY (project_id) REFERENCES invest_projects(id)
             )
         `;
@@ -132,5 +134,6 @@ const seedData = async () => {
     }
 };
 
-export { initializeDB, seedData };
+
+module.exports = { initializeDB, seedData };
 
