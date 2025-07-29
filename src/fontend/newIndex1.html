@@ -939,7 +939,7 @@
         // API配置
         const API_BASE_URL = 'http://localhost:3000';
         const USER_API_URL = API_BASE_URL + '/user/1';
-        const USER_PROJECTS_API_URL = API_BASE_URL + '/user/1/project/list';
+        const USER_PROJECTS_API_URL = API_BASE_URL + '/user/1/invest/list';
         const MARKET_PROJECTS_API_URL = API_BASE_URL + '/invest/invest/list';
         const PROJECT_DETAIL_API_URL = API_BASE_URL + '/invest/invest/';
         
@@ -1020,13 +1020,14 @@
                 const userResponse = await fetch(USER_API_URL).then(response=>response.json()).catch(error=>{throw new Error('获取用户信息失败')});
                 currentUser = userResponse;
                 // 获取用户已投资项目
-                //const projectsResponse = await fetch(USER_PROJECTS_API_URL);
-                //if (!projectsResponse.ok) throw new Error('获取用户项目失败');
-                //userProjects = await projectsResponse.json();
+                const projectsResponse = await fetch(USER_PROJECTS_API_URL).then(response=>response.json()).catch(error=>{throw new Error('获取用户项目失败')});    
+
+                userProjects =  projectsResponse.data;
+                console.log('信息:', userProjects);
                 
                 // 渲染用户信息和项目
                 renderUserInfo();
-                //renderUserProjects();
+                renderUserProjects();
                 hideLoading(investedLoader, investedError);
             } catch (error) {
                 console.error('获取用户数据失败:', error);
@@ -1061,24 +1062,23 @@
             }
             
             userProjects.forEach(project => {
-                const value = project.shares * project.currentPrice;
-                const profit = value - project.shares * project.buyPrice;
+                // const value = project.shares * project.currentPrice; 
+               // const profit = value - project.shares * project.buyPrice;
                 
                 const projectItem = document.createElement('div');
                 projectItem.className = 'project-item';
                 projectItem.innerHTML = `
                     <div class="project-info">
-                        <div class="project-name">${project.name}</div>
+                        <div class="project-name">${project.project_name}</div>
                         <div class="project-stats">
                             <div class="project-amount">
-                                <i class="fas fa-money-bill-wave"></i> 金额: <strong>¥${formatPrice(project.shares * project.buyPrice)}</strong>
+                                <i class="fas fa-money-bill-wave"></i> 金额: <strong>¥${formatPrice(project.hold_price )}</strong>
                             </div>
                             <div class="project-shares">
-                                <i class="fas fa-chart-bar"></i> 份额: <strong>${project.shares}</strong>
+                                <i class="fas fa-chart-bar"></i> 份额: <strong>${project.amount}</strong>
                             </div>
                         </div>
                     </div>
-                    <div class="project-profit ${profit >= 0 ? 'profit' : 'loss'}">${profit >= 0 ? '+' : '-'}¥${formatPrice(Math.abs(profit))}</div>
                 `;
                 
                 projectItem.addEventListener('click', () => openInvestedModal(project));
