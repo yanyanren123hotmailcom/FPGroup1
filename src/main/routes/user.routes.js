@@ -1,5 +1,11 @@
 
 import express from 'express';
+import {
+    getUserIncomeExpend,
+    addUserLogController,
+    deleteUserLogsController,
+    getUserTransactionLogsController
+} from '../controllers/user/userLog.controller.js';
 import * as userInfoManager from '../controllers/user/userInfoManager.controller.js';
 import * as userProjectManager from '../controllers/user/userProjectManager.controller.js';
 // import * as userLog from '../controllers/user/userLog.controller.js';
@@ -23,6 +29,16 @@ userRoutes.get('/:user_id/invest/list', userProjectManager.getUserProjectList);
 userRoutes.patch('/:user_id/invest/:project_id', userProjectManager.updateUserProject);
 // userRoutes.post('/:user_id/invest/buy', userProjectManager.buyInvestmentProject);
 // userRoutes.delete('/:user_id/invest/:project_id', userProjectManager.deleteUserProject);
+// GET: 获取用户收入与支出
+userRoutes.get('/:user_id/in-and-out', getUserIncomeExpend);
 
+// POST: 添加用户日志
+userRoutes.post('/:user_id/log', addUserLogController);
+
+// DELETE: 删除用户日志
+userRoutes.delete('/:user_id/log', deleteUserLogsController);
+
+// 获取用户交易记录 
+userRoutes.get('/:user_id/log/list', getUserTransactionLogsController);
 
 export default userRoutes;
