@@ -1000,6 +1000,7 @@
         const USER_TRADES_API_URL = API_BASE_URL + '/user/1/log/list';
         const MARKET_PROJECTS_API_URL = API_BASE_URL + '/invest/invest/list';
         const PROJECT_DETAIL_API_URL = API_BASE_URL + '/invest/invest/';
+        const USER_INCOME_API_URL = API_BASE_URL + '/user/1/in-and-out';
         
         // DOM elements
         const userName = document.getElementById('userName');
@@ -1472,12 +1473,12 @@
             
             try {
                 // Call API to sell shares
-                const response = await fetch(`http://localhost:3000/user/1/project/${activeProject.id}/sell`, {
-                    method: 'POST',
+                const response = await fetch(`http://localhost:3000/user/1/invest/${activeProject.project_id}`, {
+                    method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ amount })
+                    body: JSON.stringify({ "amount": amount, "action": "sell" })
                 });
                 
                 if (!response.ok) {
@@ -1495,13 +1496,34 @@
         }
         
         // Initialize earnings chart
-        function initEarningsChart() {
+       async function initEarningsChart() {
             // Simulated earnings data
+            const response = await fetch(USER_INCOME_API_URL).then(response => response.json());
+            const data1 =  response.data;
+
+            const currentDate = new Date();  // 当前日期
+
+            // 格式化日期为 YYYY-MM-DD
+            function formatDate(date) {
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, '0');
+              const day = String(date.getDate()).padStart(2, '0');
+              return `${year}-${month}-${day}`;
+            }
+            
+            // 创建labels1数组，从当前日期前7天开始，每天递增
+            const labels1 = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => {
+              const date = new Date(currentDate);
+              date.setDate(currentDate.getDate() - 6 + index);  // 'Mon'是-6，'Sun'是0（当天）
+              return formatDate(date);
+            });
+            
             const earningsData = {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                //labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                labels: labels1,
                 datasets: [{
                     label: 'Account Value',
-                    data: [189000, 192500, 196200, 197800, 202300, 204800, 207400],
+                    data: [data1[6], data1[5], data1[4], data1[3], data1[2], data1[1], data1[0]],
                     borderColor: '#3a75c4',
                     backgroundColor: 'rgba(58, 117, 196, 0.1)',
                     borderWidth: 3,
