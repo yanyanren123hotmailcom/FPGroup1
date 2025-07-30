@@ -13,8 +13,9 @@ const initializeDB = async () => {
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_name VARCHAR(255) NOT NULL,
-                current_funds decimal NOT NULL,
-                current_earnings decimal NOT NULL
+                current_funds decimal(10,4) NOT NULL commment "cash hold by user but not invested in",
+                total_cost decimal(10,4) NOT NULL commment "the amount apend by users on purchasing investment",
+                current_earnings decimal(10,4) NOT NULL
             )
         `;
         await connection.query(createTableQuery);
@@ -25,8 +26,8 @@ const initializeDB = async () => {
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 project_name VARCHAR(255) NOT NULL,
                 type  VARCHAR(255) NOT NULL,
-                price decimal NOT NULL comment 'price of the project',
-                rate decimal NOT NULL comment 'rate of the project',
+                price decimal(10,4) NOT NULL comment 'price of the project',
+                rate decimal(10,4) NOT NULL comment 'rate of the project',
                 description TEXT NOT NULL,
                 start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -34,18 +35,16 @@ const initializeDB = async () => {
         await connection.query(createInvestTableQuery);
 
         // Create the InvestHold table
-          // Create the InvestHold table
         const createInvestHoldTableQuery = `
             CREATE TABLE IF NOT EXISTS invest_holds (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
                 user_name VARCHAR(255) NOT NULL,
                 project_name VARCHAR(255) NOT NULL,
-   
                 project_type  VARCHAR(255) NOT NULL,
                 project_id INT NOT NULL,
                 amount INT NOT NULL,
-                hold_price decimal NOT NULL comment 'price of the project when user hold it',
+                hold_price decimal(10,4) NOT NULL comment 'price of the project when user hold it',
                 FOREIGN KEY (user_id) REFERENCES users(id),
                 FOREIGN KEY (project_id) REFERENCES invest_projects(id)
             )
@@ -70,7 +69,7 @@ const initializeDB = async () => {
                 action INT NOT NULL comment '1: pay, 2: sell',
                 project_id INT NOT NULL,
                 amount INT NOT NULL,
-                price decimal NOT NULL comment 'price of the project when user pay or sell it',
+                price decimal(10,4) NOT NULL comment 'price of the project when user pay or sell it',
                 date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id),
                 FOREIGN KEY (project_id) REFERENCES invest_projects(id)
@@ -84,8 +83,8 @@ const initializeDB = async () => {
                 project_id INT NOT NULL,
                 action INT NOT NULL comment '1: create, 2: update, 3: delete',
                 date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                rate decimal NOT NULL comment 'rate of the project when log created',
-                price decimal NOT NULL comment 'price of the project when log created',
+                rate decimal(10,4) NOT NULL comment 'rate of the project when log created',
+                price decimal(10,4) NOT NULL comment 'price of the project when log created',
                 FOREIGN KEY (project_id) REFERENCES invest_projects(id)
             )
         `;
