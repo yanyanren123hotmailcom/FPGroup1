@@ -10,9 +10,43 @@ const getProjectById = async (id) => {
     return rows[0];
 };
 
+// const getProjectByName = async (name) => {
+//     const [rows] = await connection.query('SELECT * FROM invest_projects WHERE project_name = ?', [name]);
+//     return rows[0];
+// };
+/**
+ * 根据项目名称进行模糊查询（无分页）
+ * @param {string} name - 项目名称关键词（支持部分匹配）
+ * @returns {Promise<Array>} 匹配的项目列表
+ */
 const getProjectByName = async (name) => {
-    const [rows] = await connection.query('SELECT * FROM invest_projects WHERE project_name = ?', [name]);
-    return rows[0];
+    // 验证输入有效性
+    if (!name || typeof name !== 'string') {
+        throw new Error('项目名称必须是有效的字符串');
+    }
+    
+    // 清理和验证输入
+    const keyword = name.trim().replace(/[%_]/g, '\\$&'); // 转义通配符
+    
+    // 构造安全搜索模式
+    const searchPattern = `%${keyword}%`;
+    const prefixPattern = `${keyword}%`; // 用于前缀匹配
+    
+    try {
+        // 执行模糊查询
+        const [rows] = await connection.query(`
+            SELECT 
+                *
+            FROM invest_projects
+            WHERE project_name LIKE ?
+            ORDER BY 
+                project_name LIKE ? DESC `, 
+         [searchPattern, prefixPattern]);
+        return rows;
+    } catch (error) {
+        console.error('项目搜索失败:', error.message);
+        throw new Error('执行项目搜索时发生错误');
+    }
 };
 
 const createProject = async (projectData) => {
