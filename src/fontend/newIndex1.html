@@ -763,12 +763,28 @@
                 <div class="section-title">
                     <i class="fas fa-folder-open"></i> 已投资项目
                 </div>
-                <button class="action-button">
+                <!-- <button class="action-button">
                     <i class="fas fa-plus"></i> 新建投资
-                </button>
+                </button> -->
             </div>
             
             <div class="project-list" id="projectList">
+                <!-- 已投资项目通过JS动态添加 -->
+            </div>
+            
+            <div class="loader" id="invested-loader"></div>
+            <div class="error-message" id="invested-error"></div>
+
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fas fa-folder-open"></i> 交易记录
+                </div>
+                <!-- <button class="action-button">
+                    <i class="fas fa-plus"></i> 新建投资
+                </button> -->
+            </div>
+            
+            <div class="trade-list" id="tradeList">
                 <!-- 已投资项目通过JS动态添加 -->
             </div>
             
@@ -902,7 +918,7 @@
                             <div class="project-id">ID: <span id="detail-id">-</span></div>
                         </div>
                         <div class="action-buttons">
-                            <button id="btn-buy" class="action-buy">买入项目</button>
+                            <button id="btn-buy" class="action-buy">增加买</button>
                             <button id="btn-sell" class="action-sell">卖出项目</button>
                         </div>
                     </div>
@@ -940,6 +956,7 @@
         const API_BASE_URL = 'http://localhost:3000';
         const USER_API_URL = API_BASE_URL + '/user/1';
         const USER_PROJECTS_API_URL = API_BASE_URL + '/user/1/invest/list';
+        const USER_TRADES_API_URL =API_BASE_URL+'/user/1/log/list';
         const MARKET_PROJECTS_API_URL = API_BASE_URL + '/invest/invest/list';
         const PROJECT_DETAIL_API_URL = API_BASE_URL + '/invest/invest/';
         
@@ -951,6 +968,7 @@
         const invested = document.getElementById('invested');
         const totalProfit = document.getElementById('totalProfit');
         const projectList = document.getElementById('projectList');
+        const tradeList = document.getElementById('tradeList');
         const investedLoader = document.getElementById('invested-loader');
         const investedError = document.getElementById('invested-error');
         
@@ -1023,11 +1041,16 @@
                 const projectsResponse = await fetch(USER_PROJECTS_API_URL).then(response=>response.json()).catch(error=>{throw new Error('获取用户项目失败')});    
 
                 userProjects =  projectsResponse.data;
-                console.log('信息:', userProjects);
+
                 
+                // 获取用户交易记录
+                const tradesResponse = await fetch(USER_TRADES_API_URL).then(response=>response.json()).catch(error=>{throw new Error('获取用户交易记录失败')});    
+
+                userTrades =  tradesResponse.data;
                 // 渲染用户信息和项目
                 renderUserInfo();
                 renderUserProjects();
+                renderUserTrades();
                 hideLoading(investedLoader, investedError);
             } catch (error) {
                 console.error('获取用户数据失败:', error);
@@ -1044,10 +1067,10 @@
             userId.textContent = user.id;
             userAvatar.textContent = user.user_name.charAt(0);
             cash.textContent = `¥${formatPrice(user.current_funds)}`;
-            invested.textContent = `¥${formatPrice(user.current_earnings)}`;
+            invested.textContent = `¥${formatPrice(user.total_cost)}`;
             
             // 计算总收益（这里简化处理）
-            const profit = parseFloat(user.current_earnings) - 1000000; // 假设初始投资100万
+            const profit = parseFloat(user.current_earnings) - parseFloat(user.total_cost); // 假设初始投资100万
             totalProfit.textContent = profit >= 0 ? `+¥${formatPrice(profit)}` : `-¥${formatPrice(Math.abs(profit))}`;
             totalProfit.className = profit >= 0 ? 'card-value profit' : 'card-value loss';
         }
@@ -1066,6 +1089,7 @@
                // const profit = value - project.shares * project.buyPrice;
                 
                 const projectItem = document.createElement('div');
+                //project-item为渲染格式
                 projectItem.className = 'project-item';
                 projectItem.innerHTML = `
                     <div class="project-info">
@@ -1083,6 +1107,43 @@
                 
                 projectItem.addEventListener('click', () => openInvestedModal(project));
                 projectList.appendChild(projectItem);
+            });
+        }
+
+        // 渲染用户交易记录
+        function renderUserTrades() {
+            userTrades.innerHTML = '';
+            
+            if (!userTrades || userTrades.length === 0) {
+                userTrades.innerHTML = '<div class="no-projects">暂无交易记录</div>';
+                return;
+            }
+            
+            userTrades.forEach(trade => {
+                // const value = project.shares * project.currentPrice; 
+               // const profit = value - project.shares * project.buyPrice;
+                
+                const tradeItem = document.createElement('div');
+                tradeItem.className = 'project-item';
+                tradeItem.innerHTML = `
+                    <div class="project-info">
+                        <div class="project-name">Assets Name:${trade.project_name}</div>
+                        <div class="project-name">Type:${trade.project_type_name}</div>
+                        <div class="project-stats">
+                            <div class="project-amount">
+                                <i class="fas fa-money-bill-wave"></i> 金额: <strong>¥${formatPrice(trade.price )}</strong>
+                            </div>
+                            <div class="project-shares">
+                                <i class="fas fa-chart-bar"></i> 份额: <strong>${trade.amount}</strong>
+                            </div>
+                        </div>
+                        <div class="project-name">Date:${trade.date}</div>
+                        <div class="project-name">Transaction Type:${trade.action === 1 ? 'buy' : trade.action === 2 ? 'sell' : 'unknown'} </div>
+                    </div>
+                `;
+                
+                // tradeItem.addEventListener('click', () => openInvestedModal(trade));
+                tradeList.appendChild(tradeItem);
             });
         }
         
@@ -1220,7 +1281,7 @@
         function renderProjectDetail(project) {
             document.getElementById('detail-id').textContent = project.id;
             document.getElementById('detail-name').textContent = project.project_name;
-            
+            // Todo
             // 设置类型显示
             let typeText = '';
             switch(project.type) {
@@ -1253,11 +1314,48 @@
         }
         
         // 打开买入模态框
-        function openBuyModal() {
+        async function openBuyModal() {
             const projectName = document.getElementById('detail-name').textContent;
             const projectPrice = document.getElementById('detail-price').textContent;
+
+
+            const currentProject = null;
+            const amount = + document.getElementById('buyAmount').value;
+            if (amount <= 0) {
+                alert('请输入正数');
+                return;
+            }
+
+            
+            try {
+                // 调用API买入更多份额
+                const response = await fetch(`http://localhost:3000/user/1/invest/${activeProject.project_id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ "amount": amount ,"action":"buy"}),
+                }).then(response => response.json());
+                
+                if (!response.message) {
+                    throw new Error('买入操作失败');
+                }
+                
+                // 重新加载用户数据
+                await fetchUserData();
+                closeInvestedModal();
+                alert(`成功买入 ${activeProject.project_name} ${amount} 份！`);
+            } catch (error) {
+                console.error('买入操作失败:', error);
+                alert('买入操作失败，请稍后重试');
+            }
+
+
+
+            
             
             alert(`准备买入 ${projectName}，当前价格 ${projectPrice}`);
+
             // 在实际应用中，这里应该打开买入模态框
         }
         

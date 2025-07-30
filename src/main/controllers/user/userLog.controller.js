@@ -175,7 +175,7 @@ import {
           date: log.date
         }));
     
-        res.status(200).json(formattedLogs);
+        res.status(200).json({"data":formattedLogs});
       } catch (error) {
         console.error('获取交易记录控制器错误:', error.message);
         
