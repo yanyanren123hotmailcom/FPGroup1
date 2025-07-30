@@ -1,5 +1,5 @@
 INSERT INTO users (user_name, current_funds, current_earnings) VALUES
-('John Doe', 135844, 0);  -- 用户当前资金 135844
+('John Doe', 135844, 325435);  -- 用户当前资金 135844
 
 
 -- 1. 更新用户资金和收益：2025-07-25
@@ -28,38 +28,30 @@ UPDATE users
 SET 
     current_funds = 113055.80,  -- 当前资金
     current_earnings = -50.20   -- 当前收益 (计算了阿里巴巴的盈利)
-WHERE id = 4;
+WHERE user_name = 'John Doe';
+------------------------------------------------------------------------------------------------------------------
 -- 插入 invest_projects 数据
--- Apple Inc.
-INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
-('Apple Inc.', 'Stock', 136.50, 0.025, 'Leading technology company');
--- Tesla Motors
-INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
-('Tesla Motors', 'Stock', 775.65, 0.030, 'Electric vehicle and energy company');
--- Alibaba Group
-INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
-('Alibaba Group', 'Stock', 89.90, 0.015, 'Chinese multinational conglomerate');
--- Vanguard S&P 500
-INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
-('Vanguard S&P 500', 'Fund', 436.46, -0.011, 'Index fund tracking S&P 500');
--- Fidelity Growth Fund
-INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
-('Fidelity Growth Fund', 'Fund', 147.00, 0.019, 'Growth stock fund');
--- BlackRock Bond Index
-INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
-('BlackRock Bond Index', 'Bond', 100.37, 0.006, 'Bond index fund');
--- US Treasury 10Y
-INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
-('US Treasury 10Y', 'Bond', 101.75, 0.004, 'US government 10-year treasury bond');
--- Corporate AAA Bond
-INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
-('Corporate AAA Bond', 'Bond', 104.42, 0.007, 'Corporate bond index');
--- Municipal Bond Fund
-INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
-('Municipal Bond Fund', 'Bond', 97.78, -0.008, 'Fund focusing on municipal bonds');
--- Green Energy Bond
-INSERT INTO invest_projects (project_name, type, price, rate, description) VALUES
-('Green Energy Bond', 'Bond', 100.75, 0.011, 'Sustainable energy bond fund');
+INSERT INTO invest_projects (
+    project_name,
+    symbol,
+    type,
+    price,
+    rate,
+    description,
+    start_date
+) VALUES 
+('Apple Inc.', 'AAPL', 'stock', 211.27, 0.14, 'Apple Inc.，纳斯达克上市公司，当前市价 211.27 美元，52 周区间 169.21 - 260.1', '2025-06-30 00:00:00'),
+('Tesla, Inc.', 'TSLA', 'stock', 321.20, 0.01, 'Tesla, Inc.，纳斯达克上市公司，当前市价 321.20 美元，52 周区间 182 - 488.54', '2025-06-30 00:00:00'),
+('Alibaba Group Holding Limited', 'BABA', 'stock', 119.36, -0.02, 'Alibaba Group Holding Limited，纽约证券交易所上市公司，当前市价 119.36 美元，52 周区间 73.87 - 148.43', '2025-06-30 00:00:00'),
+('Vanguard S&P 500 ETF', 'VOO', 'fund', 583.92, 0.03, 'Vanguard S&P 500 ETF，纽约泛欧交易所上市基金，当前市价 583.92 美元，52 周区间 442.8 - 587.08', '2025-06-30 00:00:00'),
+('Emerald Growth Institutional', 'FGROX', 'fund', 27.55, -0.01, 'Emerald Growth Fund Institution，纳斯达克上市基金，当前市价 27.55 美元，52 周区间 19.59 - 30.16', '2025-07-03 00:00:00'),
+('iShares iBoxx $ Investment Grade Corporate Bond ETF', 'LQD', 'bond', 109.38, 0.015, 'iShares iBoxx $ Investment Grade Corporate Bond ETF，纽约泛欧交易所上市基金，当前市价 109.38 美元，52 周区间 103.45 - 114.07', '2025-06-30 00:00:00'),
+('CBOE Interest Rate 10 Year T No', '^TNX', 'bond', 4.27, -0.005, 'CBOE Interest Rate 10 Year T No，美国10年期国债利率指数，当前利率4.27%', '2025-06-30 00:00:00'),
+('iShares 5-10 Year Investment Grade Corporate Bond ETF', 'IGIB', 'bond', 53.19, 0.02, 'iShares 5-10 Year Investment Grade Corporate Bond ETF，纳斯达克上市债券基金，当前市价 53.19 美元，52 周区间 50.52 - 54.1', '2025-06-30 00:00:00'),
+('iShares National Muni Bond ETF', 'MUB', 'bond', 104.49, -0.012, 'iShares National Muni Bond ETF，纳斯达克上市债券基金，当前市价 104.49 美元，52 周区间 100.29 - 108.81', '2025-06-30 00:00:00'),
+('iShares Global Clean Energy ETF', 'ICLN', 'bond', 13.73, 0.018, 'iShares Global Clean Energy 债券，纳斯达克上市债券，当前市价 13.73 美元，52 周区间 10.46 - 14.93', '2025-06-30 00:00:00');
+
+----------------------------------------------------------------------------------------------------
 
 -- 插入 invest_holds 数据 (2025-07-25 到 2025-07-28)
 
