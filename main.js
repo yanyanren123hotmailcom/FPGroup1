@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/db', dbRoutes);
 app.use('/cars', carRoutes);
 
-app.use('/', projectLogRoutes);
+// app.use('/', projectLogRoutes);
 
 
 app.use('/invest',projectRoutes);
