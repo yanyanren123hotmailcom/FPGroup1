@@ -21,15 +21,16 @@ const initializeDB = async () => {
 
         // Create the Invest table
         const createInvestTableQuery = `
-            CREATE TABLE IF NOT EXISTS invest_projects (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                project_name VARCHAR(255) NOT NULL,
-                type  VARCHAR(255) NOT NULL,
-                price decimal NOT NULL comment 'price of the project',
-                rate decimal NOT NULL comment 'rate of the project',
-                description TEXT NOT NULL,
-                start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
+            CREATE TABLE IF NOT EXISTS invest_assets_new (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_name VARCHAR(255) NOT NULL,
+    symbol VARCHAR(50) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    price DECIMAL(15,4) NOT NULL COMMENT 'price of the project',
+    rate DECIMAL(10,4) NOT NULL COMMENT 'rate of the project',
+    description TEXT NOT NULL,
+    start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
         `;
         await connection.query(createInvestTableQuery);
 
