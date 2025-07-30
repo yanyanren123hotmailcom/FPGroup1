@@ -16,7 +16,7 @@ export const getUserProjectList= async (req, res) => {
     }
 };
 
-//购买投资项目
+//gengxin投资项目
 export const updateUserProject = async (req, res) => {
     const { user_id,project_id } = req.params;
     console.log(req);

@@ -11,7 +11,7 @@ import {
     getUserTransactionLogs,addUserLogByDate
   } from '../../services/user/userLog.service.js';
   // 获取用户收入与支出
-  // 返回格式：{ income: 数字, expend: 数字 }
+  // 返回格式：{ [income: 数字, expend: 数字] }
   const getUserIncomeExpend = async (req, res) => {
     try {
       const { user_id } = req.params;
@@ -28,10 +28,8 @@ import {
         console.log("result null")  
       }
       // 返回符合API规范的JSON响应
-      res.status(200).json({
-        income: result.income,
-        expend: result.expend
-      });
+      res.status(200).json({"data":result});
+      
     } catch (error) {
       console.error('控制器错误:', error.message);
       res.status(500).json({

@@ -123,26 +123,28 @@ const getUserIncomeAndExpenditure = async (userId) => {
     if (!userId || isNaN(userId)) {
       throw new Error('无效的用户ID');
     }
-  
-    // 计算当天的收入与支出
-    const [results] = await connection.query(
-      `SELECT 
-  COALESCE(SUM(CASE WHEN action = 2 THEN amount * price ELSE 0 END), 0) AS income,
-  COALESCE(SUM(CASE WHEN action = 1 THEN amount * price ELSE 0 END), 0) AS expend
-FROM user_logs
-WHERE user_id = ? 
-  AND date >= CURDATE()
-  AND date < CURDATE() + INTERVAL 1 DAY`,
-      [userId]
-    );
+    //定义结果数组
+    let result= [];
+    // 循环计算前七天的当天的收入与支出
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const [in_and_out] = await connection.query(
+        `SELECT 
+           COALESCE(SUM(CASE WHEN action = 2 THEN amount * price ELSE 0 END), 0) AS income,
+           COALESCE(SUM(CASE WHEN action = 1 THEN amount * price ELSE 0 END), 0) AS expend
+        FROM user_logs
+        WHERE user_id = ? 
+              AND date >= ?
+              AND date < ? + INTERVAL 1 DAY`,
+          [userId, date.toISOString().split('T')[0], date.toISOString().split('T')[0]]
+      );
+      console.log(in_and_out);
 
-    // 确保 results[0] 存在，避免 undefined 错误
-    const result = results[0] || { income: 0, expend: 0 };
-
-    return {
-      income: result.income,
-      expend: result.expend
-    };
+      // 将收入和支出差值添加到结果数组
+      result.push(in_and_out[0].income - in_and_out[0].expend);
+  }
+    return result;
   } catch (error) {
     console.error('获取用户收支时出错:', error);
     throw new Error(`获取用户收支失败: ${error.message}`);
