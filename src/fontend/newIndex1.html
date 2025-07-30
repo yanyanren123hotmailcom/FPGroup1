@@ -523,6 +523,25 @@
             font-size: 16px;
         }
 
+        .modal-input1 {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .modal-input1 label {
+            font-size: 9px;
+            color: #64748b;
+            font-weight: 300;
+        }
+
+        .modal-input1 input {
+            padding: 6px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 8px;
+        }
+
         .action-buttons {
             display: flex;
             gap: 15px;
@@ -821,9 +840,9 @@
                 </div>
                 
                 <div class="search-bar">
-                    <input type="text" id="search-input" placeholder="搜索项目名称或类别...">
+                    <input type="text" id="search-input" placeholder="Search for item name or category...">
                     <button id="search-btn">
-                        <i class="fas fa-search"></i> 搜索
+                        <i class="fas fa-search"></i> Search
                     </button>
                 </div>
                 
@@ -917,10 +936,7 @@
                             <h2 id="detail-name">项目名称</h2>
                             <div class="project-id">ID: <span id="detail-id">-</span></div>
                         </div>
-                        <div class="action-buttons">
-                            <button id="btn-buy" class="action-buy">增加买</button>
-                            <button id="btn-sell" class="action-sell">卖出项目</button>
-                        </div>
+                               
                     </div>
                     
                     <div class="project-info-grid">
@@ -940,12 +956,39 @@
                             <div class="info-label">开始日期</div>
                             <div id="detail-start-date" class="info-value">-</div>
                         </div>
+                        <div>
+                            <div class="info-label">项目描述</div>
+                            <div id="detail-description" class="project-description">-</div>
+                        </div>
+                        <div class="modal-actions">
+                            <div class="modal-input1">
+                                <label for="NewAmount">交易份数</label>
+                                <input type="number" id="NewAmount" min="0" value="0">
+                            </div>
+                         
+                           
+                            <div class="modal-input1">
+                                <label for="transactionDate">选择交易日期</label>
+                                <input type="date" id="transactionDate">
+                            </div>
+
+                            <div class="modal-input">
+                                <label for="transactionType">交易类型</label>
+                                <select id="transactionType">
+                                    <option value="buy">买入</option>
+                                    <option value="sell">卖出</option>
+                                </select>
+                            </div>
+                            <div class="action-buttons">
+                                <button id="btn-buy-sell" class="action-buy">增加交易记录</button>
+                            </div>
+                            
+                        </div>
+                        
+                        
                     </div>
                     
-                    <div>
-                        <div class="info-label">项目描述</div>
-                        <div id="detail-description" class="project-description">-</div>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -1016,8 +1059,8 @@
             document.getElementById('search-input').addEventListener('input', filterMarketProjects);
             
             // 绑定买卖按钮
-            document.getElementById('btn-buy').addEventListener('click', openBuyModal);
-            document.getElementById('btn-sell').addEventListener('click', openSellModal);
+            document.getElementById('btn-buy-sell').addEventListener('click', openBuyModal);
+           // document.getElementById('btn-sell').addEventListener('click', openSellModal);
             
             // 绑定模态框事件
             setupModal(investedModal);
@@ -1210,7 +1253,7 @@
                 switch(project.type) {
                     case 'Stock':
                         typeClass = 'type-stock';
-                        typeText = '股票';
+                        typeText = 'Stock';
                         break;
                     case 'Bond':
                         typeClass = 'type-bonds';
@@ -1222,7 +1265,7 @@
                         break;
                     default:
                         typeClass = 'type-stock';
-                        typeText = '股票';
+                        typeText = 'Stock';
                 }
                 
                 row.innerHTML = `
@@ -1285,8 +1328,8 @@
             // 设置类型显示
             let typeText = '';
             switch(project.type) {
-                case 'stock':
-                    typeText = '股票';
+                case 'Stock':
+                    typeText = 'Stock';
                     break;
                 case 'bonds':
                     typeText = '债券';
@@ -1295,7 +1338,7 @@
                     typeText = '房地产';
                     break;
                 default:
-                    typeText = '股票';
+                    typeText = 'Stock   ';
             }
             document.getElementById('detail-type').textContent = typeText;
             
@@ -1317,24 +1360,36 @@
         async function openBuyModal() {
             const projectName = document.getElementById('detail-name').textContent;
             const projectPrice = document.getElementById('detail-price').textContent;
+            const project_type_name=  document.getElementById('detail-type').textContent;
 
 
             const currentProject = null;
-            const amount = + document.getElementById('buyAmount').value;
+            const amount = + document.getElementById('NewAmount').value;
             if (amount <= 0) {
                 alert('请输入正数');
                 return;
-            }
+            }          
+
+            const transactionDate = document.getElementById('transactionDate').value;
+            const transactionType = document.getElementById('transactionType').value=="buy" ? 1 : 2; // 1为买入，2为卖出
+
+          
 
             
             try {
                 // 调用API买入更多份额
-                const response = await fetch(`http://localhost:3000/user/1/invest/${activeProject.project_id}`, {
-                    method: 'PATCH',
+                const response = await fetch(`http://localhost:3000/user/1/logByDate`, {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ "amount": amount ,"action":"buy"}),
+                    body: JSON.stringify({"project_name":projectName,
+                    "project_type_name":project_type_name,
+                     "amount": amount ,
+                     "price": projectPrice,
+                     "action": transactionType,
+                     "date": transactionDate,
+                     }),
                 }).then(response => response.json());
                 
                 if (!response.message) {
@@ -1344,7 +1399,7 @@
                 // 重新加载用户数据
                 await fetchUserData();
                 closeInvestedModal();
-                alert(`成功买入 ${activeProject.project_name} ${amount} 份！`);
+                alert(`成功增加交易记录： ${activeProject.project_name} ${amount} ！`);
             } catch (error) {
                 console.error('买入操作失败:', error);
                 alert('买入操作失败，请稍后重试');
