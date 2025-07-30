@@ -9,7 +9,7 @@ export const getUserProjectList= async (req, res) => {
 
     try {
         const projects = await userProjectManagerService.getProjectsByUserId(user_id);
-        res.status(200).json({ success: true, data: projects });
+        res.status(200).json({"data":projects} );
     } catch (error) {
         console.error('Error fetching projects:', error);
         res.status(500).json({ success: false, message: 'Failed to fetch projects' });

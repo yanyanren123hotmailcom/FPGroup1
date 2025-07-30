@@ -5,10 +5,13 @@ import dbRoutes from "./src/main/routes/db.routes.js";
 
 import projectRoutes from './src/main/routes/project.routes.js';
 import userRoutes from './src/main/routes/user.routes.js';
+import cors from 'cors';
+
 import projectLogRoutes from './src/main/routes/projectLog.routes.js';
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

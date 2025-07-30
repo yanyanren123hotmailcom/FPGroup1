@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投资管理系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #app {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            grid-template-rows: auto auto 1fr;
+            grid-template-areas:
+                "header header"
+                "user-info main"
+                "invested-projects main";
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* 头部样式 */
+        .header {
+            grid-area: header;
+            background: linear-gradient(120deg, #1a3c6c, #3a75c4);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 28px;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .date-display {
+            font-size: 18px;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        /* 用户信息区域 */
+        .user-info {
+            grid-area: user-info;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3a75c4, #1a3c6c);
+        }
+
+        .user-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(120deg, #a3bded, #6991c7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .user-id {
+            font-size: 14px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .info-card {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #3a75c4;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        .card-title {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-value {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1a3c6c;
+        }
+
+        .profit {
+            color: #2ecc71;
+        }
+
+        .loss {
+            color: #e74c3c;
+        }
+
+        /* 已投资项目区域 */
+        .invested-projects {
+            grid-area: invested-projects;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-button:hover {
+            background: #3a75c4;
+            transform: translateY(-2px);
+        }
+
+        .project-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .project-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            border: 1px solid #eef2f7;
+            cursor: pointer;
+        }
+
+        .project-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #d5e3f3;
+        }
+
+        .project-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .project-stats {
+            font-size: 14px;
+            color: #7f8c8d;
+            display: flex;
+            gap: 15px;
+        }
+
+        .project-amount, .project-shares {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .project-profit {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            grid-area: main;
+            display: grid;
+            grid-template-rows: 350px 1fr;
+            gap: 20px;
+        }
+
+        /* 收益图表区域 */
+        .earnings-chart {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-filters {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chart-filter {
+            padding: 7px 15px;
+            background: #f1f5f9;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chart-filter.active {
+            background: #3a75c4;
+            color: white;
+        }
+
+        .chart-container {
+            height: calc(100% - 50px);
+            position: relative;
+        }
+
+        /* 市场项目区域 */
+        .market-projects {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #3a75c4;
+            box-shadow: 0 0 0 3px rgba(58, 117, 196, 0.1);
+        }
+
+        .search-bar button {
+            background: #3a75c4;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-bar button:hover {
+            background: #2a65b4;
+        }
+
+        .projects-table {
+            flex: 1;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #64748b;
+            position: sticky;
+            top: 0;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .type-stock {
+            background-color: rgba(66, 133, 244, 0.1);
+            color: #4285f4;
+        }
+
+        .type-bonds {
+            background-color: rgba(52, 168, 83, 0.1);
+            color: #34a853;
+        }
+
+        .type-fund {
+            background-color: rgba(234, 67, 53, 0.1);
+            color: #ea4335;
+        }
+
+        .view-detail-btn {
+            padding: 8px 15px;
+            background: #3a75c4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .view-detail-btn:hover {
+            background: #2a65b4;
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 95%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: all 0.3s;
+        }
+
+        .close-modal:hover {
+            color: #64748b;
+        }
+
+        .modal-body {
+            margin: 15px 0;
+        }
+
+        .modal-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .modal-label {
+            color: #64748b;
+        }
+
+        .modal-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .modal-actions {
+            display: grid;
+            gap: 15px;
+        }
+
+        .modal-input {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .modal-input label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .modal-input input {
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .buy-btn, .sell-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .buy-btn {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .sell-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .buy-btn:hover {
+            background: #27ae60;
+        }
+
+        .sell-btn:hover {
+            background: #c0392b;
+        }
+        
+        /* 项目详情模态框 */
+        .project-detail-modal {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 16px;
+        }
+        
+        .detail-title {
+            flex: 1;
+        }
+        
+        .detail-title h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .project-id {
+            font-size: 0.9rem;
+            color: #5f6368;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .action-buy, .action-sell {
+            padding: 10px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .action-buy {
+            background-color: #34a853;
+            color: white;
+        }
+        
+        .action-sell {
+            background-color: #ea4335;
+            color: white;
+        }
+        
+        .action-buy:hover, .action-sell:hover {
+            opacity: 0.9;
+        }
+        
+        .project-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .info-card {
+            padding: 16px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-size: 0.9rem;
+            color: #5f6368;
+            margin-bottom: 8px;
+        }
+        
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .project-description {
+            line-height: 1.8;
+            margin-top: 20px;
+        }
+        
+        /* 加载动画 */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 5px solid #1a73e8;
+            margin: 30px auto;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: #ea4335;
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            #app {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "user-info"
+                    "invested-projects"
+                    "main";
+            }
+            
+            .main-content {
+                grid-template-rows: 300px auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .project-stats, .search-bar {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .search-bar button {
+                width: 100%;
+            }
+            
+            .card-value {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 头部 -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="logo-text">投资管理系统</div>
+            </div>
+            <div class="date-display" id="currentDate">2025年7月29日 星期二 14:18:04</div>
+        </header>
+        
+        <!-- 用户信息 -->
+        <section class="user-info">
+            <div class="user-header">
+                <div class="avatar" id="userAvatar">S</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">--</div>
+                    <div class="user-id">
+                        <i class="fas fa-id-card"></i> ID: <span id="userId">--</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-cards">
+                <div class="info-card">
+                    <div class="card-title">
+                        <i class="fas fa-wallet"></i> 可用资金
+                    </div>
+                    <div class="card-value" id="cash">--</div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="card-title">
+                        <i class="fas fa-coins"></i> 当前投资总额
+                    </div>
+                    <div class="card-value" id="invested">--</div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="card-title">
+                        <i class="fas fa-chart-pie"></i> 总收益
+                    </div>
+                    <div class="card-value" id="totalProfit">--</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 已投资项目 -->
+        <section class="invested-projects">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fas fa-folder-open"></i> 已投资项目
+                </div>
+                <button class="action-button">
+                    <i class="fas fa-plus"></i> 新建投资
+                </button>
+            </div>
+            
+            <div class="project-list" id="projectList">
+                <!-- 已投资项目通过JS动态添加 -->
+            </div>
+            
+            <div class="loader" id="invested-loader"></div>
+            <div class="error-message" id="invested-error"></div>
+        </section>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <!-- 收益图表 -->
+            <section class="earnings-chart">
+                <div class="chart-header">
+                    <div class="section-title">
+                        <i class="fas fa-chart-area"></i> 收益趋势
+                    </div>
+                    <div class="chart-filters">
+                        <div class="chart-filter active">1周</div>
+                        <div class="chart-filter">1个月</div>
+                        <div class="chart-filter">3个月</div>
+                        <div class="chart-filter">1年</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="earningsChart"></canvas>
+                </div>
+            </section>
+            
+            <!-- 市场项目 -->
+            <section class="market-projects">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-list"></i> 市场投资项目
+                    </div>
+                </div>
+                
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="搜索项目名称或类别...">
+                    <button id="search-btn">
+                        <i class="fas fa-search"></i> 搜索
+                    </button>
+                </div>
+                
+                <div class="projects-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>项目名称</th>
+                                <th>类型</th>
+                                <th>价格(¥)</th>
+                                <th>收益率</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projects-table-body">
+                            <!-- 项目数据通过JS动态添加 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="loader" id="list-loader"></div>
+                <div class="error-message" id="list-error"></div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- 已投资项目模态框 -->
+    <div class="modal" id="invested-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">项目详情</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="modal-row">
+                    <span class="modal-label">买入均价</span>
+                    <span class="modal-value" id="modalBuyPrice">--</span>
+                </div>
+                <div class="modal-row">
+                    <span class="modal-label">持有份数</span>
+                    <span class="modal-value" id="modalShares">--</span>
+                </div>
+                <div class="modal-row">
+                    <span class="modal-label">当前单价</span>
+                    <span class="modal-value" id="modalCurrentPrice">--</span>
+                </div>
+                <div class="modal-row">
+                    <span class="modal-label">当前市值</span>
+                    <span class="modal-value" id="modalValue">--</span>
+                </div>
+                <div class="modal-row">
+                    <span class="modal-label">收益</span>
+                    <span class="modal-value" id="modalProfit">--</span>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <div class="modal-input">
+                    <label for="buyAmount">继续买入份数</label>
+                    <input type="number" id="buyAmount" min="0" value="0">
+                </div>
+                <div class="modal-input">
+                    <label for="sellAmount">卖出份数</label>
+                    <input type="number" id="sellAmount" min="0" value="0">
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="confirm-buy-more" class="buy-btn">
+                    <i class="fas fa-shopping-cart"></i> 确认买入
+                </button>
+                <button id="confirm-sell-shares" class="sell-btn">
+                    <i class="fas fa-dollar-sign"></i> 确认卖出
+                </button>
+                <button id="close-modal" class="btn-cancel">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 市场项目详情模态框 -->
+    <div class="modal" id="market-detail-modal">
+        <div class="modal-content">
+            <div class="project-detail-modal">
+                <div class="loader" id="detail-loader"></div>
+                <div class="error-message" id="detail-error"></div>
+                
+                <div id="detail-content">
+                    <div class="detail-header">
+                        <div class="detail-title">
+                            <h2 id="detail-name">项目名称</h2>
+                            <div class="project-id">ID: <span id="detail-id">-</span></div>
+                        </div>
+                        <div class="action-buttons">
+                            <button id="btn-buy" class="action-buy">买入项目</button>
+                            <button id="btn-sell" class="action-sell">卖出项目</button>
+                        </div>
+                    </div>
+                    
+                    <div class="project-info-grid">
+                        <div class="info-card">
+                            <div class="info-label">类型</div>
+                            <div id="detail-type" class="info-value">-</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">价格</div>
+                            <div id="detail-price" class="info-value">-</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">收益率</div>
+                            <div id="detail-rate" class="info-value">-</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">开始日期</div>
+                            <div id="detail-start-date" class="info-value">-</div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="info-label">项目描述</div>
+                        <div id="detail-description" class="project-description">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // API配置
+        const API_BASE_URL = 'http://localhost:3000';
+        const USER_API_URL = API_BASE_URL + '/user/1';
+        const USER_PROJECTS_API_URL = API_BASE_URL + '/user/1/invest/list';
+        const MARKET_PROJECTS_API_URL = API_BASE_URL + '/invest/invest/list';
+        const PROJECT_DETAIL_API_URL = API_BASE_URL + '/invest/invest/';
+        
+        // DOM元素
+        const userName = document.getElementById('userName');
+        const userId = document.getElementById('userId');
+        const userAvatar = document.getElementById('userAvatar');
+        const cash = document.getElementById('cash');
+        const invested = document.getElementById('invested');
+        const totalProfit = document.getElementById('totalProfit');
+        const projectList = document.getElementById('projectList');
+        const investedLoader = document.getElementById('invested-loader');
+        const investedError = document.getElementById('invested-error');
+        
+        const projectsTableBody = document.getElementById('projects-table-body');
+        const listLoader = document.getElementById('list-loader');
+        const listError = document.getElementById('list-error');
+        const detailLoader = document.getElementById('detail-loader');
+        const detailError = document.getElementById('detail-error');
+        const detailContent = document.getElementById('detail-content');
+        
+        const investedModal = document.getElementById('invested-modal');
+        const marketDetailModal = document.getElementById('market-detail-modal');
+        
+        // 状态变量
+        let currentUser = null;
+        let userProjects = [];
+        let marketProjects = [];
+        let activeProject = null;
+
+        // 页面加载时获取数据
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置当前日期
+            document.getElementById('currentDate').textContent = new Date().toLocaleString('zh-CN', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                weekday: 'long',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            
+            // 初始化收益图表
+            initEarningsChart();
+            
+            // 获取用户信息和已投资项目
+            fetchUserData();
+            
+            // 获取市场项目数据
+            fetchMarketProjects();
+            
+            // 搜索功能
+            document.getElementById('search-btn').addEventListener('click', filterMarketProjects);
+            document.getElementById('search-input').addEventListener('input', filterMarketProjects);
+            
+            // 绑定买卖按钮
+            document.getElementById('btn-buy').addEventListener('click', openBuyModal);
+            document.getElementById('btn-sell').addEventListener('click', openSellModal);
+            
+            // 绑定模态框事件
+            setupModal(investedModal);
+            setupModal(marketDetailModal);
+            
+            // 绑定买入卖出按钮
+            document.getElementById('confirm-buy-more').addEventListener('click', buyMore);
+            document.getElementById('confirm-sell-shares').addEventListener('click', sellShares);
+            document.getElementById('close-modal').addEventListener('click', closeInvestedModal);
+        });
+        
+        // 获取用户信息
+        async function fetchUserData() {
+            try {
+                showLoading(investedLoader, investedError);
+                
+                // 获取用户信息
+                const userResponse = await fetch(USER_API_URL).then(response=>response.json()).catch(error=>{throw new Error('获取用户信息失败')});
+                currentUser = userResponse;
+                // 获取用户已投资项目
+                const projectsResponse = await fetch(USER_PROJECTS_API_URL).then(response=>response.json()).catch(error=>{throw new Error('获取用户项目失败')});    
+
+                userProjects =  projectsResponse.data;
+                console.log('信息:', userProjects);
+                
+                // 渲染用户信息和项目
+                renderUserInfo();
+                renderUserProjects();
+                hideLoading(investedLoader, investedError);
+            } catch (error) {
+                console.error('获取用户数据失败:', error);
+                showError(investedLoader, investedError, '加载用户数据失败，请稍后重试');
+            }
+        }
+        
+        // 渲染用户信息
+        function renderUserInfo() {
+            if (!currentUser || !currentUser[0]) return;
+            
+            const user = currentUser[0];
+            userName.textContent = user.user_name;
+            userId.textContent = user.id;
+            userAvatar.textContent = user.user_name.charAt(0);
+            cash.textContent = `¥${formatPrice(user.current_funds)}`;
+            invested.textContent = `¥${formatPrice(user.current_earnings)}`;
+            
+            // 计算总收益（这里简化处理）
+            const profit = parseFloat(user.current_earnings) - 1000000; // 假设初始投资100万
+            totalProfit.textContent = profit >= 0 ? `+¥${formatPrice(profit)}` : `-¥${formatPrice(Math.abs(profit))}`;
+            totalProfit.className = profit >= 0 ? 'card-value profit' : 'card-value loss';
+        }
+        
+        // 渲染用户已投资项目
+        function renderUserProjects() {
+            projectList.innerHTML = '';
+            
+            if (!userProjects || userProjects.length === 0) {
+                projectList.innerHTML = '<div class="no-projects">暂无投资项目</div>';
+                return;
+            }
+            
+            userProjects.forEach(project => {
+                // const value = project.shares * project.currentPrice; 
+               // const profit = value - project.shares * project.buyPrice;
+                
+                const projectItem = document.createElement('div');
+                projectItem.className = 'project-item';
+                projectItem.innerHTML = `
+                    <div class="project-info">
+                        <div class="project-name">${project.project_name}</div>
+                        <div class="project-stats">
+                            <div class="project-amount">
+                                <i class="fas fa-money-bill-wave"></i> 金额: <strong>¥${formatPrice(project.hold_price )}</strong>
+                            </div>
+                            <div class="project-shares">
+                                <i class="fas fa-chart-bar"></i> 份额: <strong>${project.amount}</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                projectItem.addEventListener('click', () => openInvestedModal(project));
+                projectList.appendChild(projectItem);
+            });
+        }
+        
+        // 打开已投资项目模态框
+        function openInvestedModal(project) {
+            activeProject = project;
+            
+            document.getElementById('modalTitle').textContent = project.name;
+            document.getElementById('modalBuyPrice').textContent = `¥${formatPrice(project.buyPrice)}`;
+            document.getElementById('modalShares').textContent = project.shares;
+            document.getElementById('modalCurrentPrice').textContent = `¥${formatPrice(project.currentPrice)}`;
+            
+            const value = project.shares * project.currentPrice;
+            document.getElementById('modalValue').textContent = `¥${formatPrice(value)}`;
+            
+            const profit = value - project.shares * project.buyPrice;
+            document.getElementById('modalProfit').textContent = `${profit >= 0 ? '+' : '-'}¥${formatPrice(Math.abs(profit))}`;
+            document.getElementById('modalProfit').className = `modal-value ${profit >= 0 ? 'profit' : 'loss'}`;
+            
+            document.getElementById('buyAmount').value = 0;
+            document.getElementById('sellAmount').value = 0;
+            
+            investedModal.style.display = 'flex';
+        }
+        
+        // 关闭已投资项目模态框
+        function closeInvestedModal() {
+            investedModal.style.display = 'none';
+        }
+        
+        // 获取市场项目列表
+        async function fetchMarketProjects() {
+            try {
+                showLoading(listLoader, listError);
+                
+                const response = await fetch(MARKET_PROJECTS_API_URL);
+                if (!response.ok) throw new Error('获取市场项目失败');
+                
+                marketProjects = await response.json();
+                renderMarketProjectList(marketProjects);
+                hideLoading(listLoader, listError);
+            } catch (error) {
+                console.error('获取市场项目失败:', error);
+                showError(listLoader, listError, '加载市场项目失败，请稍后重试');
+            }
+        }
+        
+        // 渲染市场项目列表
+        function renderMarketProjectList(projects) {
+            projectsTableBody.innerHTML = '';
+            
+            projects.forEach(project => {
+                const row = document.createElement('tr');
+                
+                // 根据类型添加对应的样式类
+                let typeClass = '';
+                let typeText = '';
+                
+                switch(project.type) {
+                    case 'Stock':
+                        typeClass = 'type-stock';
+                        typeText = '股票';
+                        break;
+                    case 'Bond':
+                        typeClass = 'type-bonds';
+                        typeText = '债券';
+                        break;
+                    case 'Fund':
+                        typeClass = 'type-fund';
+                        typeText = '基金';
+                        break;
+                    default:
+                        typeClass = 'type-stock';
+                        typeText = '股票';
+                }
+                
+                row.innerHTML = `
+                    <td>${project.project_name}</td>
+                    <td><span class="type-badge ${typeClass}">${typeText}</span></td>
+                    <td>¥${formatPrice(project.price)}</td>
+                    <td>${project.rate}%</td>
+                    <td>
+                        <button class="view-detail-btn" data-id="${project.id}">查看详情</button>
+                    </td>
+                `;
+                
+                projectsTableBody.appendChild(row);
+            });
+            
+            // 绑定详情按钮事件
+            document.querySelectorAll('.view-detail-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const projectId = this.getAttribute('data-id');
+                    showMarketProjectDetail(projectId);
+                });
+            });
+        }
+        
+        // 显示市场项目详情
+        function showMarketProjectDetail(projectId) {
+            fetchProjectDetail(projectId);
+            marketDetailModal.style.display = 'flex';
+        }
+        
+        // 获取项目详情
+        async function fetchProjectDetail(projectId) {
+            try {
+                showLoading(detailLoader, detailError);
+                detailContent.style.display = 'none';
+                
+                const url = PROJECT_DETAIL_API_URL + projectId;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误! 状态码: ${response.status}`);
+                }
+                
+                const project = await response.json();
+                renderProjectDetail(project);
+                activeProject = project;
+                hideLoading(detailLoader, detailError);
+                detailContent.style.display = 'block';
+            } catch (error) {
+                console.error('获取项目详情错误:', error);
+                showError(detailLoader, detailError, '加载项目详情失败，请稍后重试');
+            }
+        }
+        
+        // 渲染项目详情
+        function renderProjectDetail(project) {
+            document.getElementById('detail-id').textContent = project.id;
+            document.getElementById('detail-name').textContent = project.project_name;
+            
+            // 设置类型显示
+            let typeText = '';
+            switch(project.type) {
+                case 'stock':
+                    typeText = '股票';
+                    break;
+                case 'bonds':
+                    typeText = '债券';
+                    break;
+                case 'real-estate':
+                    typeText = '房地产';
+                    break;
+                default:
+                    typeText = '股票';
+            }
+            document.getElementById('detail-type').textContent = typeText;
+            
+            document.getElementById('detail-price').textContent = `¥${formatPrice(project.price)}`;
+            document.getElementById('detail-rate').textContent = project.rate === "0" ? "无收益数据" : project.rate + '%';
+            
+            // 格式化日期
+            const startDate = new Date(project.start_date);
+            document.getElementById('detail-start-date').textContent = startDate.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            document.getElementById('detail-description').textContent = project.description;
+        }
+        
+        // 打开买入模态框
+        function openBuyModal() {
+            const projectName = document.getElementById('detail-name').textContent;
+            const projectPrice = document.getElementById('detail-price').textContent;
+            
+            alert(`准备买入 ${projectName}，当前价格 ${projectPrice}`);
+            // 在实际应用中，这里应该打开买入模态框
+        }
+        
+        // 打开卖出模态框
+        function openSellModal() {
+            const projectName = document.getElementById('detail-name').textContent;
+            const projectPrice = document.getElementById('detail-price').textContent;
+            
+            alert(`准备卖出 ${projectName}，当前价格 ${projectPrice}`);
+            // 在实际应用中，这里应该打开卖出模态框
+        }
+        
+        // 过滤市场项目
+        function filterMarketProjects() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            
+            const filteredProjects = marketProjects.filter(project => {
+                // 检查项目名称或类型是否匹配搜索词
+                return project.project_name.toLowerCase().includes(searchTerm) || 
+                      (project.type === 'stock' && '股票'.includes(searchTerm)) ||
+                      (project.type === 'bonds' && '债券'.includes(searchTerm)) ||
+                      (project.type === 'real-estate' && '房地产'.includes(searchTerm));
+            });
+            
+            renderMarketProjectList(filteredProjects);
+        }
+        
+        // 设置模态框通用功能
+        function setupModal(modal) {
+            const closeBtn = modal.querySelector('.close-modal') || modal.querySelector('.close-modal');
+            
+            // 关闭按钮
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    modal.style.display = 'none';
+                });
+            }
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+        
+        // 格式化价格显示
+        function formatPrice(price) {
+            return parseFloat(price).toLocaleString('zh-CN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+        
+        // 买入更多份额
+        async function buyMore() {
+            const amount = +document.getElementById('buyAmount').value;
+            if (amount <= 0) {
+                alert('请输入正数');
+                return;
+            }
+            
+            try {
+                // 调用API买入更多份额
+                const response = await fetch(`http://localhost:3000/user/1/project/${activeProject.id}/buy`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ amount })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('买入操作失败');
+                }
+                
+                // 重新加载用户数据
+                await fetchUserData();
+                closeInvestedModal();
+                alert(`成功买入 ${activeProject.name} ${amount} 份！`);
+            } catch (error) {
+                console.error('买入操作失败:', error);
+                alert('买入操作失败，请稍后重试');
+            }
+        }
+        
+        // 卖出份额
+        async function sellShares() {
+            const amount = +document.getElementById('sellAmount').value;
+            if (amount <= 0) {
+                alert('请输入正数');
+                return;
+            }
+            
+            if (amount > activeProject.shares) {
+                alert('超出持有份数');
+                return;
+            }
+            
+            try {
+                // 调用API卖出份额
+                const response = await fetch(`http://localhost:3000/user/1/project/${activeProject.id}/sell`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ amount })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('卖出操作失败');
+                }
+                
+                // 重新加载用户数据
+                await fetchUserData();
+                closeInvestedModal();
+                alert(`成功卖出 ${activeProject.name} ${amount} 份！`);
+            } catch (error) {
+                console.error('卖出操作失败:', error);
+                alert('卖出操作失败，请稍后重试');
+            }
+        }
+        
+        // 初始化收益图表
+        function initEarningsChart() {
+            // 模拟用户投资收益趋势数据
+            const earningsData = {
+                labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                datasets: [{
+                    label: '账户净值',
+                    data: [189000, 192500, 196200, 197800, 202300, 204800, 207400],
+                    borderColor: '#3a75c4',
+                    backgroundColor: 'rgba(58, 117, 196, 0.1)',
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    fill: true,
+                    tension: 0.3
+                }]
+            };
+            
+            // 初始化收益图表
+            const ctx = document.getElementById('earningsChart').getContext('2d');
+            const earningsChart = new Chart(ctx, {
+                type: 'line',
+                data: earningsData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(44, 62, 80, 0.9)',
+                            padding: 12,
+                            titleFont: {
+                                size: 16
+                            },
+                            bodyFont: {
+                                size: 14
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return `¥${context.parsed.y.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '¥' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 为图表筛选按钮添加事件
+            const filterButtons = document.querySelectorAll('.chart-filter');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    // 在实际应用中，这里应该获取不同时间范围的数据
+                });
+            });
+        }
+        
+        // 显示加载状态
+        function showLoading(loader, error) {
+            if (loader) loader.style.display = 'block';
+            if (error) error.style.display = 'none';
+        }
+        
+        // 隐藏加载状态
+        function hideLoading(loader, error) {
+            if (loader) loader.style.display = 'none';
+            if (error) error.style.display = 'none';
+        }
+        
+        // 显示错误信息
+        function showError(loader, error, message) {
+            if (loader) loader.style.display = 'none';
+            if (error) {
+                error.textContent = message;
+                error.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

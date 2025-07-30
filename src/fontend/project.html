@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <title>投资项目管理平台</title>
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #8ab4f8;
+            --bg-light: #f8f9fa;
+            --border-color: #e0e0e0;
+            --text-dark: #202124;
+            --text-light: #5f6368;
+            --success-color: #34a853;
+            --danger-color: #ea4335;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* 头部样式 */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .logo-icon {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+        
+        .balance-info {
+            background-color: var(--bg-light);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+        }
+        
+        .balance-amount {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        /* 主体样式 */
+        main {
+            padding: 30px 0;
+        }
+        
+        .page-title {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-title h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .search-bar {
+            display: flex;
+            max-width: 400px;
+            margin-bottom: 24px;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px 0 0 4px;
+            font-size: 1rem;
+        }
+        
+        .search-bar button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        /* 项目列表表格样式 */
+        .projects-table {
+            width: 100%;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background-color: var(--bg-light);
+        }
+        
+        th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-light);
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background-color: rgba(138, 180, 248, 0.05);
+        }
+        
+        .type-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .type-stock {
+            background-color: rgba(66, 133, 244, 0.1);
+            color: #4285f4;
+        }
+        
+        .type-bonds {
+            background-color: rgba(52, 168, 83, 0.1);
+            color: var(--success-color);
+        }
+        
+        .type-real-estate {
+            background-color: rgba(234, 67, 53, 0.1);
+            color: var(--danger-color);
+        }
+        
+        .view-detail-btn {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        
+        .view-detail-btn:hover {
+            background-color: rgba(138, 180, 248, 0.1);
+        }
+        
+        /* 详情页样式 */
+        .detail-container {
+            display: none;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            padding: 8px 0;
+        }
+        
+        .project-detail {
+            background-color: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
+        }
+        
+        .detail-title {
+            flex: 1;
+        }
+        
+        .detail-title h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .project-id {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .action-buy, .action-sell {
+            padding: 10px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .action-buy {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .action-sell {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .action-buy:hover, .action-sell:hover {
+            opacity: 0.9;
+        }
+        
+        .project-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .info-card {
+            padding: 16px;
+            background-color: var(--bg-light);
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+        
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .project-description {
+            line-height: 1.8;
+        }
+        
+        /* 模态窗口样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .btn-cancel, .btn-confirm {
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .btn-cancel {
+            background-color: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-confirm {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        
+        .btn-cancel:hover {
+            background-color: var(--bg-light);
+        }
+        
+        .btn-confirm:hover {
+            background-color: #0d62c9;
+        }
+        
+        /* 加载动画 */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 5px solid var(--primary-color);
+            margin: 30px auto;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: var(--danger-color);
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .balance-info {
+                width: 100%;
+            }
+            
+            th, td {
+                padding: 12px 8px;
+                font-size: 0.9rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .page-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .detail-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .action-buttons {
+                width: 100%;
+            }
+            
+            .action-buy, .action-sell {
+                width: 100%;
+            }
+            
+            .project-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">📈</div>
+                    <h1>投资项目管理平台</h1>
+                </div>
+                <div class="balance-info">
+                    可用余额: <span class="balance-amount">¥1,250,000.00</span>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container">
+        <!-- 项目列表视图 -->
+        <div id="list-view">
+            <div class="page-title">
+                <h2>投资项目列表</h2>
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="搜索项目名称或类别...">
+                    <button id="search-btn">搜索</button>
+                </div>
+            </div>
+            
+            <div class="projects-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>项目名称</th>
+                            <th>类型</th>
+                            <th>价格(¥)</th>
+                            <th>收益率</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projects-table-body">
+                        <!-- 项目数据通过JS动态添加 -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="loader" id="list-loader"></div>
+            <div class="error-message" id="list-error"></div>
+        </div>
+        
+        <!-- 项目详情视图 -->
+        <div id="detail-view" class="detail-container">
+            <button id="back-to-list" class="back-btn">
+                <span>←</span> 返回列表
+            </button>
+            
+            <div class="project-detail">
+                <div class="loader" id="detail-loader"></div>
+                <div class="error-message" id="detail-error"></div>
+                
+                <div id="detail-content">
+                    <div class="detail-header">
+                        <div class="detail-title">
+                            <h2 id="detail-name">项目名称</h2>
+                            <div class="project-id">ID: <span id="detail-id">-</span></div>
+                        </div>
+                        <div class="action-buttons">
+                            <button id="btn-buy" class="action-buy">买入项目</button>
+                            <button id="btn-sell" class="action-sell">卖出项目</button>
+                        </div>
+                    </div>
+                    
+                    <div class="project-info-grid">
+                        <div class="info-card">
+                            <div class="info-label">类型</div>
+                            <div id="detail-type" class="info-value">-</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">价格</div>
+                            <div id="detail-price" class="info-value">-</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">收益率</div>
+                            <div id="detail-rate" class="info-value">-</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">开始日期</div>
+                            <div id="detail-start-date" class="info-value">-</div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="info-label">项目描述</div>
+                        <div id="detail-description" class="project-description">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- 买入模态窗口 -->
+    <div id="buy-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">买入项目</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <p>项目: <strong><span id="buy-project-name">-</span></strong></p>
+            <p>当前价格: ¥<span id="buy-project-price">-</span></p>
+            
+            <div class="form-group">
+                <label for="buy-amount">买入数量</label>
+                <input type="number" id="buy-amount" min="1" value="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="total-cost">预计总金额</label>
+                <input type="text" id="total-cost" readonly>
+            </div>
+            
+            <div class="modal-actions">
+                <button id="cancel-buy" class="btn-cancel">取消</button>
+                <button id="confirm-buy" class="btn-confirm">确认买入</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 卖出模态窗口 -->
+    <div id="sell-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">卖出项目</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <p>项目: <strong><span id="sell-project-name">-</span></strong></p>
+            <p>当前价格: ¥<span id="sell-project-price">-</span></p>
+            
+            <div class="form-group">
+                <label for="sell-amount">卖出数量</label>
+                <input type="number" id="sell-amount" min="1" value="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="expected-revenue">预计收益</label>
+                <input type="text" id="expected-revenue" readonly>
+            </div>
+            
+            <div class="modal-actions">
+                <button id="cancel-sell" class="btn-cancel">取消</button>
+                <button id="confirm-sell" class="btn-confirm">确认卖出</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // API配置
+        const API_BASE_URL = 'http://localhost:3000';
+        const PROJECTS_API_URL = API_BASE_URL + '/invest/invest/list';
+        const PROJECT_DETAIL_API_URL = API_BASE_URL + '/invest/invest/';
+        
+        // 选择代理方案：
+        // 1. 使用替代的CORS代理服务
+        // 2. 直接请求后端API（如果后端已配置CORS）
+        const USE_PROXY = true; // 设置为false以直接请求后端API
+        
+        // 替代的CORS代理服务
+        const PROXY_SERVICES = [
+            'https://corsproxy.io/?',
+            'https://api.allorigins.win/raw?url=',
+            'https://cors-anywhere.herokuapp.com/'
+        ];
+        
+        // DOM元素
+        const listView = document.getElementById('list-view');
+        const detailView = document.getElementById('detail-view');
+        const projectsTableBody = document.getElementById('projects-table-body');
+        const backToListBtn = document.getElementById('back-to-list');
+        const buyBtn = document.getElementById('btn-buy');
+        const sellBtn = document.getElementById('btn-sell');
+        const listLoader = document.getElementById('list-loader');
+        const listError = document.getElementById('list-error');
+        const detailLoader = document.getElementById('detail-loader');
+        const detailError = document.getElementById('detail-error');
+        const detailContent = document.getElementById('detail-content');
+        
+        const buyModal = document.getElementById('buy-modal');
+        const sellModal = document.getElementById('sell-modal');
+        
+        // 状态变量
+        let currentProject = null;
+        let allProjects = [];
+        
+        // 页面加载时获取项目数据
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchProjects();
+            
+            // 搜索功能
+            document.getElementById('search-btn').addEventListener('click', filterProjects);
+            document.getElementById('search-input').addEventListener('input', filterProjects);
+            
+            // 绑定返回按钮
+            backToListBtn.addEventListener('click', () => {
+                listView.style.display = 'block';
+                detailView.style.display = 'none';
+            });
+            
+            // 绑定买卖按钮
+            buyBtn.addEventListener('click', openBuyModal);
+            sellBtn.addEventListener('click', openSellModal);
+            
+            // 绑定模态框事件
+            setupModal(buyModal);
+            setupModal(sellModal);
+            
+            // 计算金额
+            document.getElementById('buy-amount').addEventListener('input', calculateBuyTotal);
+            document.getElementById('sell-amount').addEventListener('input', calculateSellTotal);
+            
+            // 绑定买卖确认按钮
+            document.getElementById('confirm-buy').addEventListener('click', buyProject);
+            document.getElementById('confirm-sell').addEventListener('click', sellProject);
+            
+            // 绑定模态框取消按钮
+            document.getElementById('cancel-buy').addEventListener('click', () => buyModal.style.display = 'none');
+            document.getElementById('cancel-sell').addEventListener('click', () => sellModal.style.display = 'none');
+        });
+        
+        // 获取项目列表
+        async function fetchProjects() {
+                showLoading(listLoader, listError);
+                
+                let url =PROJECTS_API_URL;
+              
+                const response = await fetch(url).then(response => response.json()).catch(error => {
+                    console.error('获取项目列表失败:', error);
+                    showError(listLoader, listError, '加载项目列表失败，请稍后重试');
+                });
+                
+                               
+                allProjects = response;
+                renderProjectList(response);
+                hideLoading(listLoader, listError);
+           
+        }
+        
+        // 获取项目详情
+        async function fetchProjectDetail(projectId) {
+            try {
+                showLoading(detailLoader, detailError);
+                detailContent.style.display = 'none';
+                
+                let url = PROJECT_DETAIL_API_URL + projectId;
+          
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误! 状态码: ${response.status}`);
+                }
+                
+                // 检查响应内容类型
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error("响应不是有效的JSON格式");
+                }
+                
+                const project = await response.json();
+                renderProjectDetail(project);
+                currentProject = project;
+                hideLoading(detailLoader, detailError);
+                detailContent.style.display = 'block';
+            } catch (error) {
+                console.error('获取项目详情错误:', error);
+                showError(detailLoader, detailError, '加载项目详情失败，请稍后重试');
+            }
+        }
+        
+        // 渲染项目列表
+        function renderProjectList(projects) {
+            projectsTableBody.innerHTML = '';
+            
+            projects.forEach(project => {
+                const row = document.createElement('tr');
+                
+                // 根据类型添加对应的样式类
+                let typeClass = '';
+                let typeText = '';
+                
+                switch(project.type) {
+                    case 'Stock':
+                        typeClass = 'type-stock';
+                        typeText = 'Stock';
+                        break;
+                    case 'Bond':
+                        typeClass = 'type-bonds';
+                        typeText = 'Bond';
+                        break;
+                    case 'Fund':
+                        typeClass = 'type-real-estate';
+                        typeText = 'Fund';
+                        break;
+                    default:
+                        typeClass = 'type-stock';
+                        typeText = 'Stock';
+                }
+                
+                row.innerHTML = `
+                    <td>${project.project_name}</td>
+                    <td><span class="type-badge ${typeClass}">${typeText}</span></td>
+                    <td>¥${formatPrice(project.price)}</td>
+                    <td>${project.rate}</td>
+                    <td>
+                        <button class="view-detail-btn" data-id="${project.id}">查看详情</button>
+                    </td>
+                `;
+                
+                projectsTableBody.appendChild(row);
+            });
+            
+            // 绑定详情按钮事件
+            document.querySelectorAll('.view-detail-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const projectId = this.getAttribute('data-id');
+                    showProjectDetail(projectId);
+                });
+            });
+        }
+        
+        // 显示项目详情
+        function showProjectDetail(projectId) {
+            fetchProjectDetail(projectId);
+            listView.style.display = 'none';
+            detailView.style.display = 'block';
+        }
+        
+        // 渲染项目详情
+        function renderProjectDetail(project) {
+            document.getElementById('detail-id').textContent = project.id;
+            document.getElementById('detail-name').textContent = project.project_name;
+            
+            // 设置类型显示
+            let typeText = '';
+            switch(project.type) {
+                case 'stock':
+                    typeText = '股票';
+                    break;
+                case 'bonds':
+                    typeText = '债券';
+                    break;
+                case 'real-estate':
+                    typeText = '房地产';
+                    break;
+                default:
+                    typeText = '股票';
+            }
+            document.getElementById('detail-type').textContent = typeText;
+            
+            document.getElementById('detail-price').textContent = `¥${formatPrice(project.price)}`;
+            document.getElementById('detail-rate').textContent = project.rate === "0" ? "无收益数据" : project.rate + '%';
+            
+            // 格式化日期
+            const startDate = new Date(project.start_date);
+            document.getElementById('detail-start-date').textContent = startDate.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            document.getElementById('detail-description').textContent = project.description;
+        }
+        
+        // 打开买入模态框
+        function openBuyModal() {
+            const projectName = document.getElementById('detail-name').textContent;
+            const projectPrice = document.getElementById('detail-price').textContent;
+            
+            document.getElementById('buy-project-name').textContent = projectName;
+            document.getElementById('buy-project-price').textContent = projectPrice.replace('¥', '').replace(',', '');
+            document.getElementById('buy-amount').value = 1;
+            calculateBuyTotal();
+            
+            buyModal.style.display = 'flex';
+        }
+        
+        // 打开卖出模态框
+        function openSellModal() {
+            const projectName = document.getElementById('detail-name').textContent;
+            const projectPrice = document.getElementById('detail-price').textContent;
+            
+            document.getElementById('sell-project-name').textContent = projectName;
+            document.getElementById('sell-project-price').textContent = projectPrice.replace('¥', '').replace(',', '');
+            document.getElementById('sell-amount').value = 1;
+            calculateSellTotal();
+            
+            sellModal.style.display = 'flex';
+        }
+        
+        // 计算购买总价
+        function calculateBuyTotal() {
+            const price = parseFloat(document.getElementById('buy-project-price').textContent.replace(',', ''));
+            const amount = parseInt(document.getElementById('buy-amount').value) || 0;
+            const total = price * amount;
+            
+            document.getElementById('total-cost').value = `¥${formatPrice(total.toFixed(2))}`;
+        }
+        
+        // 计算卖出收益
+        function calculateSellTotal() {
+            const price = parseFloat(document.getElementById('sell-project-price').textContent.replace(',', ''));
+            const amount = parseInt(document.getElementById('sell-amount').value) || 0;
+            const total = price * amount;
+            
+            document.getElementById('expected-revenue').value = `¥${formatPrice(total.toFixed(2))}`;
+        }
+        
+        // 过滤项目
+        function filterProjects() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            
+            const filteredProjects = allProjects.filter(project => {
+                // 检查项目名称或类型是否匹配搜索词
+                return project.project_name.toLowerCase().includes(searchTerm) || 
+                      (project.type === 'stock' && '股票'.includes(searchTerm)) ||
+                      (project.type === 'bonds' && '债券'.includes(searchTerm)) ||
+                      (project.type === 'real-estate' && '房地产'.includes(searchTerm));
+            });
+            
+            renderProjectList(filteredProjects);
+        }
+        
+        // 设置模态框通用功能
+        function setupModal(modal) {
+            const closeBtn = modal.querySelector('.close-modal');
+            
+            // 关闭按钮
+            closeBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+        
+        // 格式化价格显示
+        function formatPrice(price) {
+            return parseFloat(price).toLocaleString('zh-CN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+        
+        // 买入项目操作
+        function buyProject() {
+            const amount = document.getElementById('buy-amount').value;
+            
+            if (!amount || parseInt(amount) <= 0) {
+                alert('请输入有效的购买数量');
+                return;
+            }
+            
+            // 这里调用实际的买入API
+            console.log(`买入项目 ID: ${currentProject.id}, 数量: ${amount}`);
+            
+            // 模拟API调用
+            setTimeout(() => {
+                buyModal.style.display = 'none';
+                alert(`成功买入 ${currentProject.project_name} 项目 ${amount} 单位！`);
+            }, 800);
+        }
+        
+        // 卖出项目操作
+        function sellProject() {
+            const amount = document.getElementById('sell-amount').value;
+            
+            if (!amount || parseInt(amount) <= 0) {
+                alert('请输入有效的卖出数量');
+                return;
+            }
+            
+            // 这里调用实际的卖出API
+            console.log(`卖出项目 ID: ${currentProject.id}, 数量: ${amount}`);
+            
+            // 模拟API调用
+            setTimeout(() => {
+                sellModal.style.display = 'none';
+                alert(`成功卖出 ${currentProject.project_name} 项目 ${amount} 单位！`);
+            }, 800);
+        }
+        
+        // 显示加载状态
+        function showLoading(loader, error) {
+            loader.style.display = 'block';
+            if (error) error.style.display = 'none';
+        }
+        
+        // 隐藏加载状态
+        function hideLoading(loader, error) {
+            loader.style.display = 'none';
+            if (error) error.style.display = 'none';
+        }
+        
+        // 显示错误信息
+        function showError(loader, error, message) {
+            loader.style.display = 'none';
+            if (error) {
+                error.textContent = message;
+                error.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
