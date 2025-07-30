@@ -139,7 +139,6 @@ const getUserIncomeAndExpenditure = async (userId) => {
               AND date < ? + INTERVAL 1 DAY`,
           [userId, date.toISOString().split('T')[0], date.toISOString().split('T')[0]]
       );
-      console.log(in_and_out);
 
       // 将收入和支出差值添加到结果数组
       result.push(in_and_out[0].income - in_and_out[0].expend);

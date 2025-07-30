@@ -115,13 +115,13 @@ import {
           message: 'amount和price必须是正数'
         });
       }
-      // 验证日期格式 (YYYY-MM-DD)
-      if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-        return res.status(400).json({
-          error: '无效日期格式',
-          message: 'date 必须是YYYY-MM-DD格式'
-        });
-      }
+      // // 验证日期格式 (YYYY-MM-DD)
+      // if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      //   return res.status(400).json({
+      //     error: '无效日期格式',
+      //     message: 'date 必须是YYYY-MM-DD格式'
+      //   });
+      // }
   
       // 调用服务层添加日志
       const result = await addUserLogByDate({
