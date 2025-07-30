@@ -13,7 +13,8 @@ const initializeDB = async () => {
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_name VARCHAR(255) NOT NULL,
-                current_funds decimal(10,4) NOT NULL,
+                current_funds decimal(10,4) NOT NULL commment "cash hold by user but not invested in",
+                total_cost decimal(10,4) NOT NULL commment "the amount apend by users on purchasing investment",
                 current_earnings decimal(10,4) NOT NULL
             )
         `;
@@ -34,14 +35,12 @@ const initializeDB = async () => {
         await connection.query(createInvestTableQuery);
 
         // Create the InvestHold table
-          // Create the InvestHold table
         const createInvestHoldTableQuery = `
             CREATE TABLE IF NOT EXISTS invest_holds (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
                 user_name VARCHAR(255) NOT NULL,
                 project_name VARCHAR(255) NOT NULL,
-   
                 project_type  VARCHAR(255) NOT NULL,
                 project_id INT NOT NULL,
                 amount INT NOT NULL,
