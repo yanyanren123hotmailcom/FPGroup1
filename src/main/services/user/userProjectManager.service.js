@@ -136,17 +136,17 @@ import connection from '../../config/db.js'; // 数据库连接配置
           // 如果是购买操作，增加用户的总投资金额
             await connection.query(`
                 UPDATE users 
-                SET current_funds = current_funds - ? 
+                SET current_funds = current_funds - ? , total_cost = total_cost + ? 
                 WHERE id = ?`,
-                [holdPrice, user_id]
+                [holdPrice, holdPrice,user_id]
             );
             }else if (action === 'sell') {
             // 如果是卖出操作，减少用户的总投资金额
                 await connection.query(`
                 UPDATE users
-                SET current_funds = current_funds + ? 
+                SET current_funds = current_funds + ? , total_cost = total_cost - ? 
                 WHERE id = ?`,  
-                [holdPrice, user_id]
+                [holdPrice, holdPrice, user_id]
                 );
             }
       //5.添加user_logs记录
