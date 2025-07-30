@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>股票价格查询</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2rem;
+      background-color: #f9f9f9;
+    }
+    input {
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 200px;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      margin-left: 1rem;
+    }
+    #chart-container {
+      margin-top: 2rem;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+    canvas {
+      background: white;
+      border: 1px solid #ccc;
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>📈 股票价格走势图（Yahoo Finance API）</h1>
+  <label for="symbol">股票代码：</label>
+  <input type="text" id="symbol" placeholder="例如：AAPL、ICLN">
+  <button onclick="loadData()">查询</button>
+
+  <div id="chart-container">
+    <canvas id="priceChart"></canvas>
+  </div>
+
+  <script>
+    let chart = null;
+
+    function loadData() {
+      const symbol = document.getElementById("symbol").value.trim().toUpperCase();
+      if (!symbol) {
+        alert("请输入股票代码！");
+        return;
+      }
+
+      fetch(`/api/stock-data?symbol=${symbol}`)
+        .then(res => {
+          if (!res.ok) throw new Error("服务器错误");
+          return res.json();
+        })
+        .then(data => {
+          const body = data.body;
+          if (!body || Object.keys(body).length === 0) {
+            throw new Error("无数据");
+          }
+
+          const points = Object.values(body).sort((a, b) => a.date_utc - b.date_utc);
+          const labels = points.map(p => {
+            const d = new Date(p.date_utc * 1000);
+            return d.toLocaleString();
+          });
+          const prices = points.map(p => p.close);
+
+          const ctx = document.getElementById('priceChart').getContext('2d');
+          if (chart) chart.destroy();
+
+          chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [{
+                label: `${symbol} 收盘价走势`,
+                data: prices,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false
+              }]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                x: {
+                  title: {
+                    display: true,
+                    text: '时间'
+                  }
+                },
+                y: {
+                  title: {
+                    display: true,
+                    text: '价格（USD）'
+                  }
+                }
+              }
+            }
+          });
+        })
+        .catch(err => {
+          alert("⚠️ 获取数据失败，请检查股票代码是否正确或稍后再试。");
+          console.error(err);
+        });
+    }
+  </script>
+</body>
+</html>
