@@ -4,7 +4,8 @@ import {
     getUserIncomeExpend,
     addUserLogController,
     deleteUserLogsController,
-    getUserTransactionLogsController
+    getUserTransactionLogsController,
+    addUserLogByDateController
 } from '../controllers/user/userLog.controller.js';
 import * as userInfoManager from '../controllers/user/userInfoManager.controller.js';
 import * as userProjectManager from '../controllers/user/userProjectManager.controller.js';
@@ -34,6 +35,8 @@ userRoutes.get('/:user_id/in-and-out', getUserIncomeExpend);
 
 // POST: 添加用户日志
 userRoutes.post('/:user_id/log', addUserLogController);
+// POST: 添加用户日志（按日期）
+userRoutes.post('/:user_id/logByDate', addUserLogByDateController);
 
 // DELETE: 删除用户日志
 userRoutes.delete('/:user_id/log', deleteUserLogsController);

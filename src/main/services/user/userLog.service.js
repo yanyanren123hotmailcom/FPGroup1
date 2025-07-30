@@ -36,6 +36,42 @@ const addUserLog = async (userLogData) => {
     }
   };
 
+  // 添加用户日志日期自定义
+const addUserLogByDate = async (userLogData) => {
+  try {
+    const { user_id, project_id, action, amount, price, date} = userLogData;
+    // 验证用户是否存在
+    const [user] = await connection.query(
+      'SELECT id FROM users WHERE id = ?', 
+      [user_id]
+    );
+    if (user.length === 0) {
+      throw new Error('用户不存在');
+    }
+    // 验证项目是否存在
+    const [project] = await connection.query(
+      'SELECT id FROM invest_projects WHERE id = ?', 
+      [project_id]
+    );
+    if (project.length === 0) {
+      throw new Error('投资项目不存在');
+    }
+    // ***插入日志到数据库
+    const [result] = await connection.query(
+      'INSERT INTO user_logs (user_id, action, project_id, amount, price, date) VALUES (?, ?, ?, ?, ?, ?)',
+      [user_id, action, project_id, amount, price, date]
+    );
+
+    return {
+      logId: result.insertId,
+      message: '日志添加成功'
+    };
+  } catch (error) {
+    console.error('添加用户日志时出错:', error);
+    throw new Error(error.message || '添加日志失败');
+  }
+};
+
 // 删除用户日志
 
   const deleteUserLogsByDate = async (userId, beginDate, endDate) => {
@@ -163,5 +199,6 @@ const getUserTransactionLogs = async (userId) => {
     getUserIncomeAndExpenditure,
     addUserLog,
     deleteUserLogsByDate,
-    getUserTransactionLogs
+    getUserTransactionLogs,
+    addUserLogByDate
 };

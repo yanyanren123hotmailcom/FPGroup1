@@ -8,7 +8,7 @@ import {
     getUserIncomeAndExpenditure,
     addUserLog,
     deleteUserLogsByDate,
-    getUserTransactionLogs
+    getUserTransactionLogs,addUserLogByDate
   } from '../../services/user/userLog.service.js';
   // 获取用户收入与支出
   // 返回格式：{ income: 数字, expend: 数字 }
@@ -93,7 +93,69 @@ import {
         });
       }
     };
-    
+   
+   // 新增：添加用户日志控制器日期自定义
+  
+  
+   const addUserLogByDateController = async (req, res) => {
+    try {
+      const { user_id } = req.params;
+      const { project_id, action, amount, price, date } = req.body;
+  
+      // 验证action有效性 (1=购买, 2=抛售)
+      if (action !== 1 && action !== 2) {
+        return res.status(400).json({
+          error: '无效操作类型',
+          message: 'action 必须为1(购买)或2(抛售)'
+        });
+      }
+  
+      // 验证金额数据
+      if (isNaN(amount) || amount <= 0 || isNaN(price) || price <= 0) {
+        return res.status(400).json({
+          error: '无效金额数据',
+          message: 'amount和price必须是正数'
+        });
+      }
+      // 验证日期格式 (YYYY-MM-DD)
+      if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return res.status(400).json({
+          error: '无效日期格式',
+          message: 'date 必须是YYYY-MM-DD格式'
+        });
+      }
+  
+      // 调用服务层添加日志
+      const result = await addUserLogByDate({
+        user_id,
+        project_id,
+        action,
+        amount,
+        price,
+        date
+      });
+  
+      // 返回成功响应 (状态码201)
+      res.status(201).json(result);
+    } catch (error) {
+      console.error('添加日志控制器错误:', error.message);
+      
+      // 处理已知错误类型
+      if (error.message.includes('用户不存在') || error.message.includes('投资项目不存在')) {
+        return res.status(404).json({
+          error: '资源未找到',
+          message: error.message
+        });
+      }
+      
+      // 其他错误
+      res.status(500).json({
+        error: '内部服务器错误',
+        message: error.message || '未知错误'
+      });
+    }
+  };
+  
   
   // 新增：删除日志控制器
   const deleteUserLogsController = async (req, res) => {
@@ -207,5 +269,6 @@ import {
       addUserLogController,
       deleteUserLogsController,
       getUserTransactionLogsController
+      , addUserLogByDateController
   };
     
