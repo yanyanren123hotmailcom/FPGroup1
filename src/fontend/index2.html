@@ -14,6 +14,62 @@
             font-family: 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
+        /* 遮罩层样式 */
+.alert-modal {
+    display: none; /* 默认隐藏 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6); /* 半透明遮罩 */
+    z-index: 1000;
+}
+
+/* 弹窗内容容器 - 关键居中代码 */
+.alert-content {
+    position: absolute;
+    top: 50%;                  /* 顶部定位到50%位置 */
+    left: 50%;                 /* 左侧定位到50%位置 */
+    transform: translate(-50%, -50%); /* 自身偏移50%宽高实现完全居中 */
+    
+    background-color: white;
+    border-radius: 8px;
+    padding: 30px;
+    max-width: 80%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+/* 按钮样式 */
+.alert-btn {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    margin-top: 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* 响应式调整 */
+@media (max-width: 480px) {
+    .alert-content {
+        padding: 20px;
+    }
+}
+          #chart-container {
+            margin-top: 2rem;
+            max-width: 100%;
+            overflow-x: auto;
+          }
+          canvas {
+            background: white;
+            border: 1px solid #ccc;
+            padding: 1rem;
+          }
+
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
             min-height: 100vh;
@@ -437,6 +493,21 @@
             background: #2a65b4;
         }
 
+        .view-flow-detail-btn {
+            padding: 8px 15px;
+            background: #3a75c4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .view-flow-detail-btn:hover {
+            background: #2a65b4;
+        }
+
         /* Modal */
         .modal {
             display: none;
@@ -739,7 +810,7 @@
         }
     </style>
 </head>
-<body>
+<body id="flow">
     <div id="app">
         <!-- Header -->
         <header class="header">
@@ -833,6 +904,7 @@
                 <div class="chart-container">
                     <canvas id="earningsChart"></canvas>
                 </div>
+                <div class="chart-container" ><canvas id="priceChart"></canvas></div>
             </section>
             
             <!-- Market projects -->
@@ -918,7 +990,13 @@
             </div>
         </div>
     </div>
-    
+    <!-- 自定义弹窗容器 -->
+    <div id="customAlert" class="alert-modal">
+        <div class="alert-content">
+            <p id="alert-message">这是提示内容</p>
+            <button class="alert-btn" onclick="hideAlert()">Certain</button>
+        </div>
+    </div>
     <!-- Market project detail modal -->
     <div class="modal" id="market-detail-modal">
         <div class="modal-content">
@@ -991,7 +1069,95 @@
             </div>
         </div>
     </div>
+    <div class="modal" id="market-flow-detail-modal">
+        <div class="modal-content">
+            <div class="project-detail-modal">
+                <div class="loader" id="detail-loader"></div>
+                <div class="error-message" id="detail-error"></div>
+                
+                <div id="detail-content">
+                    <div class="detail-header">
+                        <div class="detail-title">
+                            <h2 id="detail-name">Investment Name</h2>
+                            <div class="project-id">ID: <span id="detail-id">-</span></div>
+                        </div>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    
+                    <div class="project-info-grid">
+                        <div class="info-card">
+                            <div class="info-label">Type</div>
+                            <div id="detail-type" class="info-value">-</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">Price</div>
+                            <div id="detail-price" class="info-value">-</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">Yield</div>
+                            <div id="detail-rate" class="info-value">-</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">Start Date</div>
+                            <div id="detail-start-date" class="info-value">-</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">Project Description</div>
+                            <div id="detail-description" class="project-description">-</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 新增的图表区域 -->
+                    <div class="chart-section">
+                        <div class="chart-header">
+                            <h3><i class="fas fa-chart-line"></i> Price Trend</h3>
+                            <div class="chart-controls">
+                                <div class="symbol-input">
+                                    <label for="symbol">Stock Symbol:</label>
+                                    <input type="text" id="symbol" placeholder="e.g. AAPL, ICLN">
+                                </div>
+                                <button id="load-chart-btn" class="action-buy">
+                                    <i class="fas fa-sync-alt"></i> Load Chart
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="flowPriceChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <div class="modal-input1">
+                            <label for="NewAmount">Trade Share</label>
+                            <input type="number" id="NewAmount" min="0" value="0">
+                        </div>
+                     
+                        <div class="form-group">
+                            <label for="transactionDateTime">Transaction Date & Time</label>
+                            <div class="datetime-container">
+                                <input type="date" id="transactionDate" value="2025-07-30">
+                                <input type="time" id="transactionTime" step="60" value="00:00">
+                            </div>
+                        </div>
     
+                        <div class="modal-input">
+                            <label for="transactionType">Transaction Type</label>
+                            <select id="transactionType">
+                                <option value="buy">Buy</option>
+                                <option value="sell">Sell</option>
+                            </select>
+                        </div>
+                        <div class="action-buttons">
+                            <button id="btn-buy-sell" class="action-buy">Add Transaction Record</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
         // API configuration
         const API_BASE_URL = 'http://localhost:3000';
@@ -1023,6 +1189,7 @@
         
         const investedModal = document.getElementById('invested-modal');
         const marketDetailModal = document.getElementById('market-detail-modal');
+        const marketFlowDetailModal = document.getElementById('market-flow-detail-modal');
         
         // State variables
         let currentUser = null;
@@ -1070,6 +1237,17 @@
             document.getElementById('close-modal').addEventListener('click', closeInvestedModal);
         });
         
+        function showCustomAlert(message) {
+            const alert = document.getElementById('customAlert');
+            document.getElementById('alert-message').textContent = message;
+            alert.style.display = 'block';
+        }
+        
+        // 隐藏弹窗
+        function hideAlert() {
+            document.getElementById('customAlert').style.display = 'none';
+        }
+
         // Fetch user data
         async function fetchUserData() {
             try {
@@ -1256,16 +1434,108 @@
                     <td>
                         <button class="view-detail-btn" data-id="${project.id}">Details</button>
                     </td>
+                     <td>
+                        <button  class="view-flow-detail-btn" data-flow="${project.symbol}">FlowDetails</button>
+                    </td>
                 `;
                 
                 projectsTableBody.appendChild(row);
             });
-            
+           
             // Bind detail buttons
             document.querySelectorAll('.view-detail-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const projectId = this.getAttribute('data-id');
                     showMarketProjectDetail(projectId);
+                });
+            });
+
+            const container = document.getElementById('flow');
+            // Bind detail buttons
+            document.querySelectorAll('.view-flow-detail-btn').forEach(btn => {
+                btn.addEventListener('click',()=> {
+                    //const projectSymbol = this.getAttribute('data-flow');
+                    const newHtml=`
+                    <div style="margin-top:2rem;max-width:100%;overflow-x:auto;">
+                    <style>
+    canvas {
+      background: white;
+      border: 1px solid #ccc;
+      padding: 1rem;
+    }
+  </style>
+                        <canvas id="priceChart" ></canvas>
+                        <script>
+    let chart = null;
+
+    async function loadData() {
+     
+
+      const response = await fetch({
+        method: 'GET',
+        url: 'https://yahoo-finance15.p.rapidapi.com/api/v1/markets/stock/history',
+        params: {
+          symbol: 'VOO',
+          interval: '5m',
+          range: '1d', 
+          diffandsplits: 'false'
+        },
+        headers: {
+          'x-rapidapi-key': '33b611f5demsh6475972129d309cp108f9ejsn8c803ffc88fe',
+          'x-rapidapi-host': 'yahoo-finance15.p.rapidapi.com'
+        }
+      });
+  
+    body= response.json().data.body;
+    if (!body || Object.keys(body).length === 0) {
+        throw new Error("无数据");
+      }
+
+      const points = Object.values(body).sort((a, b) => a.date_utc - b.date_utc);
+      const labels = points.map(p => {
+        const d = new Date(p.date_utc * 1000);
+        return d.toLocaleString();
+      });
+      const prices = points.map(p => p.close);
+
+      const ctx = document.getElementById('priceChart').getContext('2d');
+      if (chart) chart.destroy();
+
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            data: prices,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 2,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: '时间'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: '价格（USD）'
+              }
+            }
+          }
+        }
+      });
+    }
+  <\/script>
+                    </div>
+                    `;
+                    container.innerHTML = newHtml;
+                    showMarketProjectFlowDetail(projectSymbol);
                 });
             });
         }
@@ -1274,6 +1544,73 @@
         function showMarketProjectDetail(projectId) {
             fetchProjectDetail(projectId);
             marketDetailModal.style.display = 'flex';
+        }
+        // Show market project details
+        let chart=null;
+
+        async function showMarketProjectFlowDetail(symbol) {
+            const response = await fetch({
+                method: 'GET',
+                url: 'https://yahoo-finance15.p.rapidapi.com/api/v1/markets/stock/history',
+                params: {
+                  symbol: symbol,
+                  interval: '5m',
+                  range: '1d', 
+                  diffandsplits: 'false'
+                },
+                headers: {
+                  'x-rapidapi-key': '33b611f5demsh6475972129d309cp108f9ejsn8c803ffc88fe',
+                  'x-rapidapi-host': 'yahoo-finance15.p.rapidapi.com'
+                }
+              });
+          
+            body= response.data.body;
+            if (!body || Object.keys(body).length === 0) {
+                throw new Error("无数据");
+              }
+    
+              const points = Object.values(body).sort((a, b) => a.date_utc - b.date_utc);
+              const labels = points.map(p => {
+                const d = new Date(p.date_utc * 1000);
+                return d.toLocaleString();
+              });
+              const prices = points.map(p => p.close);
+    
+              const ctx = document.getElementById('priceChart').getContext('2d');
+              if (chart) chart.destroy();
+    
+              chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                  labels,
+                  datasets: [{
+                    label: `${symbol} 收盘价走势`,
+                    data: prices,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: false
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  scales: {
+                    x: {
+                      title: {
+                        display: true,
+                        text: '时间'
+                      }
+                    },
+                    y: {
+                      title: {
+                        display: true,
+                        text: '价格（USD）'
+                      }
+                    }
+                  }
+                }
+              });
+               
+           // marketFlowDetailModal.style.display = 'block';
         }
         
         // Fetch project details
@@ -1345,7 +1682,7 @@
 
             const amount = + document.getElementById('NewAmount').value;
             if (amount <= 0) {
-                alert('Please enter a positive number');
+                showCustomAlert('Please enter a positive number');
                 return;
             }          
 
@@ -1377,10 +1714,12 @@
                 // Reload user data
                 await fetchUserData();
                 marketDetailModal.style.display = 'none';
-                alert(`Successfully added transaction: ${projectName} ${amount} shares!`);
+                showCustomAlert(`Successfully added transaction: ${projectName} ${amount} shares!`)
+                //alert(`Successfully added transaction: ${projectName} ${amount} shares!`);
             } catch (error) {
                 console.error('Transaction failed:', error);
-                alert('Transaction failed, please try again');
+                showCustomAlert('Transaction failed, please try again')
+                //alert('Transaction failed, please try again');
             }
         }
         
@@ -1430,7 +1769,7 @@
         async function buyMore() {
             const amount = +document.getElementById('buyAmount').value;
             if (amount <= 0) {
-                alert('Please enter a positive number');
+                showCustomAlert('Please enter a positive number');
                 return;
             }
 
@@ -1451,10 +1790,10 @@
                 // Reload user data
                 await fetchUserData();
                 closeInvestedModal();
-                alert(`Successfully bought ${activeProject.project_name} ${amount} shares!`);
+                showCustomAlert(`Successfully bought ${activeProject.project_name} ${amount} shares!`);
             } catch (error) {
                 console.error('Buy operation failed:', error);
-                alert('Buy operation failed, please try again');
+                showCustomAlert('Buy operation failed, please try again');
             }
         }
         
@@ -1462,12 +1801,12 @@
         async function sellShares() {
             const amount = +document.getElementById('sellAmount').value;
             if (amount <= 0) {
-                alert('Please enter a positive number');
+                showCustomAlert('Please enter a positive number');
                 return;
             }
             
             if (amount > activeProject.shares) {
-                alert('Exceeds shares held');
+                showCustomAlert('Exceeds shares held');
                 return;
             }
             
@@ -1488,15 +1827,16 @@
                 // Reload user data
                 await fetchUserData();
                 closeInvestedModal();
-                alert(`Successfully sold ${activeProject.name} ${amount} shares!`);
+                showCustomAlert(`Successfully sold ${activeProject.project_name} ${amount} shares!`);
             } catch (error) {
                 console.error('Sell operation failed:', error);
-                alert('Sell operation failed, please try again');
+                showCustomAlert('Sell operation failed, please try again');
             }
         }
         
         // Initialize earnings chart
        async function initEarningsChart() {
+       
             // Simulated earnings data
             const response = await fetch(USER_INCOME_API_URL).then(response => response.json());
             const data1 =  response.data;
