@@ -14,7 +14,51 @@
             font-family: 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
-        
+        /* 遮罩层样式 */
+.alert-modal {
+    display: none; /* 默认隐藏 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6); /* 半透明遮罩 */
+    z-index: 1000;
+}
+
+/* 弹窗内容容器 - 关键居中代码 */
+.alert-content {
+    position: absolute;
+    top: 50%;                  /* 顶部定位到50%位置 */
+    left: 50%;                 /* 左侧定位到50%位置 */
+    transform: translate(-50%, -50%); /* 自身偏移50%宽高实现完全居中 */
+    
+    background-color: white;
+    border-radius: 8px;
+    padding: 30px;
+    max-width: 80%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+/* 按钮样式 */
+.alert-btn {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    margin-top: 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* 响应式调整 */
+@media (max-width: 480px) {
+    .alert-content {
+        padding: 20px;
+    }
+}
           #chart-container {
             margin-top: 2rem;
             max-width: 100%;
@@ -946,7 +990,13 @@
             </div>
         </div>
     </div>
-    
+    <!-- 自定义弹窗容器 -->
+    <div id="customAlert" class="alert-modal">
+        <div class="alert-content">
+            <p id="alert-message">这是提示内容</p>
+            <button class="alert-btn" onclick="hideAlert()">Certain</button>
+        </div>
+    </div>
     <!-- Market project detail modal -->
     <div class="modal" id="market-detail-modal">
         <div class="modal-content">
@@ -1187,6 +1237,17 @@
             document.getElementById('close-modal').addEventListener('click', closeInvestedModal);
         });
         
+        function showCustomAlert(message) {
+            const alert = document.getElementById('customAlert');
+            document.getElementById('alert-message').textContent = message;
+            alert.style.display = 'block';
+        }
+        
+        // 隐藏弹窗
+        function hideAlert() {
+            document.getElementById('customAlert').style.display = 'none';
+        }
+
         // Fetch user data
         async function fetchUserData() {
             try {
@@ -1621,7 +1682,7 @@
 
             const amount = + document.getElementById('NewAmount').value;
             if (amount <= 0) {
-                alert('Please enter a positive number');
+                showCustomAlert('Please enter a positive number');
                 return;
             }          
 
@@ -1653,10 +1714,12 @@
                 // Reload user data
                 await fetchUserData();
                 marketDetailModal.style.display = 'none';
-                alert(`Successfully added transaction: ${projectName} ${amount} shares!`);
+                showCustomAlert(`Successfully added transaction: ${projectName} ${amount} shares!`)
+                //alert(`Successfully added transaction: ${projectName} ${amount} shares!`);
             } catch (error) {
                 console.error('Transaction failed:', error);
-                alert('Transaction failed, please try again');
+                showCustomAlert('Transaction failed, please try again')
+                //alert('Transaction failed, please try again');
             }
         }
         
@@ -1706,7 +1769,7 @@
         async function buyMore() {
             const amount = +document.getElementById('buyAmount').value;
             if (amount <= 0) {
-                alert('Please enter a positive number');
+                showCustomAlert('Please enter a positive number');
                 return;
             }
 
@@ -1727,10 +1790,10 @@
                 // Reload user data
                 await fetchUserData();
                 closeInvestedModal();
-                alert(`Successfully bought ${activeProject.project_name} ${amount} shares!`);
+                showCustomAlert(`Successfully bought ${activeProject.project_name} ${amount} shares!`);
             } catch (error) {
                 console.error('Buy operation failed:', error);
-                alert('Buy operation failed, please try again');
+                showCustomAlert('Buy operation failed, please try again');
             }
         }
         
@@ -1738,12 +1801,12 @@
         async function sellShares() {
             const amount = +document.getElementById('sellAmount').value;
             if (amount <= 0) {
-                alert('Please enter a positive number');
+                showCustomAlert('Please enter a positive number');
                 return;
             }
             
             if (amount > activeProject.shares) {
-                alert('Exceeds shares held');
+                showCustomAlert('Exceeds shares held');
                 return;
             }
             
@@ -1764,10 +1827,10 @@
                 // Reload user data
                 await fetchUserData();
                 closeInvestedModal();
-                alert(`Successfully sold ${activeProject.project_name} ${amount} shares!`);
+                showCustomAlert(`Successfully sold ${activeProject.project_name} ${amount} shares!`);
             } catch (error) {
                 console.error('Sell operation failed:', error);
-                alert('Sell operation failed, please try again');
+                showCustomAlert('Sell operation failed, please try again');
             }
         }
         
