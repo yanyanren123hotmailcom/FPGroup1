@@ -1764,7 +1764,7 @@
                 // Reload user data
                 await fetchUserData();
                 closeInvestedModal();
-                alert(`Successfully sold ${activeProject.name} ${amount} shares!`);
+                alert(`Successfully sold ${activeProject.project_name} ${amount} shares!`);
             } catch (error) {
                 console.error('Sell operation failed:', error);
                 alert('Sell operation failed, please try again');
